@@ -109,3 +109,7 @@ MVP: SQLite + SQLModel/SQLAlchemy.
 ## Design license
 
 This design is the primary blueprint for `movefit`; update with changes in `docs/design.md`.
+
+## Frontend docs
+- Nueva carpeta: `docs/frontend-react-vite-tailwind/`
+- Guías: overview, starter-checklist, integration.
