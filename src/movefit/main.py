@@ -2,6 +2,7 @@ from __future__ import annotations
 
 from contextlib import asynccontextmanager
 from datetime import datetime, timezone
+from typing import Any
 
 from fastapi import Depends, FastAPI, HTTPException, Query
 from sqlmodel import Session, select, func
@@ -43,6 +44,40 @@ def create_measurement(
     session.commit()
     session.refresh(model)
     return model
+
+
+@app.post(
+    "/measurements/bulk-import",
+    response_model=models.BulkImportResult,
+    status_code=201,
+    summary="Bulk import measurements",
+    description="Import multiple measurement rows in a single request.",
+    tags=["measurements"],
+)
+def bulk_import_measurements(
+    payload: list[dict[str, Any]],
+    session: Session = Depends(db.get_session),
+):
+    imported = 0
+    skipped = 0
+    errors: list[str] = []
+
+    for idx, row in enumerate(payload):
+        try:
+            measurement = models.MeasurementCreate.model_validate(row)
+            if not measurement.weight_kg and measurement.weight_lb:
+                measurement.weight_kg = measurement.weight_lb * 0.45359237
+
+            db_model = models.Measurement.model_validate(measurement)
+            session.add(db_model)
+            imported += 1
+        except Exception as exc:
+            skipped += 1
+            errors.append(f"row[{idx}]: {exc}")
+
+    session.commit()
+
+    return models.BulkImportResult(imported=imported, skipped=skipped, errors=errors)
 
 
 @app.get(
