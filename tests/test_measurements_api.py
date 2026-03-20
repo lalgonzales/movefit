@@ -169,3 +169,30 @@ def test_alerts_and_goals(client: TestClient):
     goals_list = client.get('/goals')
     assert goals_list.status_code == 200
     assert any(g['target_weight_lb'] == 160.0 for g in goals_list.json())
+
+def test_measurements_pagination(client: TestClient):
+    # Prepare dataset
+    for i in range(5):
+        client.post('/measurements', json={
+            'device_mac': f'00:11:22:33:44:{50 + i}',
+            'device_name': f'Scale {i}',
+            'weight_lb': 140.0 + i,
+            'weight_kg': (140.0 + i) * 0.45359237,
+            'body_fat_pct': 20.0 + i,
+            'bmi': 21.0 + i,
+        })
+
+    r = client.get('/measurements?offset=1&limit=2&sort=asc')
+    assert r.status_code == 200
+    assert len(r.json()) == 2
+
+    # Check range filter by timestamp
+    all_meas = client.get('/measurements').json()
+    assert len(all_meas) >= 5
+
+    from_ts = all_meas[1]['timestamp']
+    to_ts = all_meas[3]['timestamp']
+    r2 = client.get(f'/measurements?from={from_ts}&to={to_ts}&limit=10')
+    assert r2.status_code == 200
+    data2 = r2.json()
+    assert len(data2) >= 2

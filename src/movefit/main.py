@@ -18,7 +18,7 @@ async def lifespan(app: FastAPI):
 
 app = FastAPI(
     title="movefit",
-    description="API to ingest and query body composition data.",
+    description="API to ingest and query body composition measurements.",
     version="0.1.0",
     lifespan=lifespan,
 )
@@ -84,11 +84,26 @@ def bulk_import_measurements(
     "/measurements",
     response_model=list[models.MeasurementRead],
     summary="List measurements",
-    description="Get all measurements ordered by timestamp.",
+    description="Retrieve measurements with pagination and optional time filtering.",
     tags=["measurements"],
 )
-def read_measurements(session: Session = Depends(db.get_session)):
-    statement = select(models.Measurement).order_by(models.Measurement.timestamp)
+def read_measurements(
+    offset: int = Query(0, ge=0),
+    limit: int = Query(100, ge=1, le=1000),
+    from_ts: datetime | None = Query(None, alias="from"),
+    to_ts: datetime | None = Query(None, alias="to"),
+    sort: str = Query("asc", pattern="^(asc|desc)$"),
+    session: Session = Depends(db.get_session),
+):
+    statement = select(models.Measurement)
+    if from_ts:
+        statement = statement.where(models.Measurement.timestamp >= from_ts)
+    if to_ts:
+        statement = statement.where(models.Measurement.timestamp <= to_ts)
+
+    statement = statement.order_by(models.Measurement.timestamp.asc() if sort == "asc" else models.Measurement.timestamp.desc())
+    statement = statement.offset(offset).limit(limit)
+
     results = session.exec(statement).all()
     return results
 
@@ -172,7 +187,6 @@ def measurement_trends(
         value = m.weight_kg if metric == "weight" else (m.bmi or 0.0)
         points.append(models.TrendPoint(timestamp=m.timestamp, value=value))
 
-    # cheap slope estimator
     slope = 0.0
     if len(points) > 1:
         x_vals = list(range(len(points)))
