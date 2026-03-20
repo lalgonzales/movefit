@@ -133,3 +133,39 @@ def test_bulk_import_measurements(client: TestClient):
     all_measurements = client.get('/measurements')
     assert all_measurements.status_code == 200
     assert len(all_measurements.json()) >= 3
+
+def test_alerts_and_goals(client: TestClient):
+    # create data for alerts
+    client.post('/measurements', json={
+        'device_mac': 'AA:AA:AA:AA:AA:AA',
+        'device_name': 'Scale A',
+        'weight_lb': 170.0,
+        'weight_kg': 77.1,
+        'body_fat_pct': 31.5,
+        'bmi': 31.0,
+    })
+    client.post('/measurements', json={
+        'device_mac': 'BB:BB:BB:BB:BB:BB',
+        'device_name': 'Scale B',
+        'weight_lb': 173.0,
+        'weight_kg': 78.5,
+        'body_fat_pct': 30.1,
+        'bmi': 31.5,
+    })
+
+    # Alerts should detect high bg and rapid gain
+    alerts_response = client.get('/alerts')
+    assert alerts_response.status_code == 200
+    alerts = alerts_response.json()['alerts']
+    assert any(a['metric'] == 'body_fat_pct' for a in alerts)
+    assert any(a['metric'] == 'weight_kg' for a in alerts)
+
+    # Goals create/read
+    goal_payload = {'target_weight_lb': 160.0, 'target_date': '2026-12-31', 'type': 'weight'}
+    goal_res = client.post('/goals', json=goal_payload)
+    assert goal_res.status_code == 201
+    assert goal_res.json()['target_weight_lb'] == 160.0
+
+    goals_list = client.get('/goals')
+    assert goals_list.status_code == 200
+    assert any(g['target_weight_lb'] == 160.0 for g in goals_list.json())
