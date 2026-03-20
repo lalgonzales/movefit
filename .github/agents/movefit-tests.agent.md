@@ -18,6 +18,14 @@ user-invocable: false
 
 This agent writes tests and validates behavior with real cases.
 
+## Purpose
+
+- enforce test-first behavior and assertion patterns.
+
+## Usage
+
+- As movefit-tests, generate unit test stubs and run `pytest` after each PR.
+
 ## Focus
 
 - API tests using `TestClient` for endpoints

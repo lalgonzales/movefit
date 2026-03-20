@@ -22,6 +22,14 @@ user-invocable: false
 
 This agent creates and validates CI configurations.
 
+## Purpose
+
+- standard CI pipeline with `python -m pytest`, `hatchling check`, and package build.
+
+## Usage
+
+- As movefit-ci, add workflow definitions + minimal matrix for 3.11+.
+
 ## Focus
 
 - `.github/workflows/python-app.yml`
