@@ -19,7 +19,7 @@ This prompt helps standardize focus and reduces ambiguity in agent coordination.
 
 ## Example Invocation
 ```
-/user-instruction "add a frontend agent/spec file for React/Vite/Tailwind and make sure docs are in English" 
+/user-instruction "add a frontend agent/spec file for React/Vite/Tailwind and make sure docs are in English"
 /context "branch feature/frontend-team, docs partially created; agents already exist"
 /priority high
 ```
