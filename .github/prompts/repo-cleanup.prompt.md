@@ -19,7 +19,7 @@ You are the project coordinator agent. Before starting any new feature or design
 
 ## Scenarios to handle
 
-- On `main` already (skip checkout). 
+- On `main` already (skip checkout).
 - With uncommitted changes (return `dirty` and avoid automatic cleanup).
 - No network (report error with suggestion).
 - Already clean (return `clean`).
