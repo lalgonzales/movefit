@@ -14,8 +14,8 @@ When the user asks to reset local Git state to a clean `main` branch and prepare
 
 ## Example Invocation
 ```
-/user_instruction "Switch to main, pull latest, delete local feature branches, prune remotes" 
-/context "current branch feature/frontend-team, PR #17 open" 
+/user_instruction "Switch to main, pull latest, delete local feature branches, prune remotes"
+/context "current branch feature/frontend-team, PR #17 open"
 ```
 
 ## Implementation Guidance
