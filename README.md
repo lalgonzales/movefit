@@ -19,4 +19,3 @@ Current project status: fully functional backend with measurement endpoints, ana
 1. Add CI workflow in `.github/workflows/python-app.yml`.
 2. Implement a lightweight frontend for consumption.
 3. Publish, document, and version the application.
-
