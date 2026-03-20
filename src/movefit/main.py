@@ -2,12 +2,15 @@ from __future__ import annotations
 
 from contextlib import asynccontextmanager
 from datetime import datetime, timezone
+from pathlib import Path
+from tempfile import NamedTemporaryFile
 from typing import Any
 
-from fastapi import Depends, FastAPI, HTTPException, Query
+import pandas as pd
+from fastapi import Depends, FastAPI, File, Form, HTTPException, Query, UploadFile
 from sqlmodel import Session, select, func
 
-from . import db, models
+from . import db, importer, models
 
 
 @asynccontextmanager
@@ -46,6 +49,33 @@ def create_measurement(
     return model
 
 
+@app.get(
+    "/measurements",
+    response_model=list[models.MeasurementRead],
+    summary="List measurements",
+    description="Retrieve measurements with pagination and optional time filtering.",
+    tags=["measurements"],
+)
+def read_measurements(
+    offset: int = Query(0, ge=0),
+    limit: int = Query(100, ge=1, le=1000),
+    from_ts: datetime | None = Query(None, alias="from"),
+    to_ts: datetime | None = Query(None, alias="to"),
+    sort: str = Query("asc", pattern="^(asc|desc)$"),
+    session: Session = Depends(db.get_session),
+):
+    statement = select(models.Measurement)
+    if from_ts:
+        statement = statement.where(models.Measurement.timestamp >= from_ts)
+    if to_ts:
+        statement = statement.where(models.Measurement.timestamp <= to_ts)
+
+    statement = statement.order_by(models.Measurement.timestamp.asc() if sort == "asc" else models.Measurement.timestamp.desc())
+    statement = statement.offset(offset).limit(limit)
+
+    return session.exec(statement).all()
+
+
 @app.post(
     "/measurements/bulk-import",
     response_model=models.BulkImportResult,
@@ -80,39 +110,58 @@ def bulk_import_measurements(
     return models.BulkImportResult(imported=imported, skipped=skipped, errors=errors)
 
 
-@app.get(
-    "/measurements",
-    response_model=list[models.MeasurementRead],
-    summary="List measurements",
-    description="Retrieve measurements with pagination and optional time filtering.",
+@app.post(
+    "/measurements/bulk-import/xlsx",
+    response_model=models.BulkImportResult,
+    status_code=201,
+    summary="Bulk import measurements from XLSX",
+    description="Upload an XLSX file and import measurements from it.",
     tags=["measurements"],
 )
-def read_measurements(
-    offset: int = Query(0, ge=0),
-    limit: int = Query(100, ge=1, le=1000),
-    from_ts: datetime | None = Query(None, alias="from"),
-    to_ts: datetime | None = Query(None, alias="to"),
-    sort: str = Query("asc", pattern="^(asc|desc)$"),
+def bulk_import_measurements_xlsx(
+    file: UploadFile = File(...),
     session: Session = Depends(db.get_session),
 ):
-    statement = select(models.Measurement)
-    if from_ts:
-        statement = statement.where(models.Measurement.timestamp >= from_ts)
-    if to_ts:
-        statement = statement.where(models.Measurement.timestamp <= to_ts)
+    imported = 0
+    skipped = 0
+    errors: list[str] = []
 
-    statement = statement.order_by(models.Measurement.timestamp.asc() if sort == "asc" else models.Measurement.timestamp.desc())
-    statement = statement.offset(offset).limit(limit)
+    with NamedTemporaryFile(suffix=".xlsx", delete=False) as tmp:
+        contents = file.file.read()
+        tmp.write(contents)
+        tmp_path = Path(tmp.name)
 
-    results = session.exec(statement).all()
-    return results
+    try:
+        for idx, measurement in enumerate(importer.read_xlsx_measurements(tmp_path)):
+            try:
+                if not measurement.weight_kg and measurement.weight_lb:
+                    measurement.weight_kg = measurement.weight_lb * 0.45359237
 
+                db_model = models.Measurement.model_validate(measurement)
+                session.add(db_model)
+                imported += 1
+            except Exception as exc:
+                skipped += 1
+                errors.append(f"row[{idx}]: {exc}")
+
+        session.commit()
+
+    finally:
+        try:
+            tmp_path.unlink()
+        except FileNotFoundError:
+            pass
+
+    return models.BulkImportResult(imported=imported, skipped=skipped, errors=errors)
+
+
+# ... rest of endpoints remain unchanged ...
 
 @app.get(
     "/measurements/latest",
     response_model=models.MeasurementRead,
     summary="Latest measurement",
-    description="Get the latest measurement by timestamp.",
+    description="Get the most recent measurement by timestamp.",
     tags=["measurements"],
 )
 def read_latest_measurement(session: Session = Depends(db.get_session)):
@@ -127,7 +176,7 @@ def read_latest_measurement(session: Session = Depends(db.get_session)):
     "/measurements/{measurement_id}",
     response_model=models.MeasurementRead,
     summary="Get a measurement",
-    description="Get a measurement by ID.",
+    description="Retrieve a measurement by ID.",
     tags=["measurements"],
 )
 def read_measurement(measurement_id: int, session: Session = Depends(db.get_session)):
@@ -141,7 +190,7 @@ def read_measurement(measurement_id: int, session: Session = Depends(db.get_sess
     "/summary",
     response_model=models.MeasurementSummary,
     summary="Measurement summary",
-    description="Get aggregated measurement stats.",
+    description="Return aggregate stats across measurements.",
     tags=["analytics"],
 )
 def measurement_summary(session: Session = Depends(db.get_session)):
@@ -154,7 +203,6 @@ def measurement_summary(session: Session = Depends(db.get_session)):
         func.avg(models.Measurement.body_fat_pct),
     )
     row = session.exec(statement).one()
-
     if row[0] == 0:
         raise HTTPException(status_code=404, detail="No measurements available")
 
@@ -172,7 +220,7 @@ def measurement_summary(session: Session = Depends(db.get_session)):
     "/trends",
     response_model=models.MeasurementTrends,
     summary="Measurement trends",
-    description="Get measurement trend points for weight or BMI.",
+    description="Return a time series for weight/BMI.",
     tags=["analytics"],
 )
 def measurement_trends(
@@ -191,11 +239,11 @@ def measurement_trends(
     if len(points) > 1:
         x_vals = list(range(len(points)))
         y_vals = [p.value for p in points]
-        mean_x = sum(x_vals) / len(x_vals)
-        mean_y = sum(y_vals) / len(y_vals)
-        num = sum((x - mean_x) * (y - mean_y) for x, y in zip(x_vals, y_vals))
-        den = sum((x - mean_x) ** 2 for x in x_vals)
-        slope = num / den if den != 0 else 0.0
+        mean_x = sum(x_vals)/len(x_vals)
+        mean_y = sum(y_vals)/len(y_vals)
+        num = sum((x-mean_x)*(y-mean_y) for x,y in zip(x_vals,y_vals))
+        den = sum((x-mean_x)**2 for x in x_vals)
+        slope = num/den if den else 0.0
 
     category = "stable"
     if slope > 0.01:
@@ -210,39 +258,22 @@ def measurement_trends(
     "/alerts",
     response_model=models.AlertList,
     summary="Get health alerts",
-    description="Generate alerts based on recent measurements.",
+    description="Create simple health alerts based on measurements.",
     tags=["analytics"],
 )
 def get_alerts(session: Session = Depends(db.get_session)):
     measurements = session.exec(select(models.Measurement).order_by(models.Measurement.timestamp)).all()
-    alerts: list[models.AlertItem] = []
+    alerts = []
 
-    for i, m in enumerate(measurements):
-        if m.body_fat_pct is not None and m.body_fat_pct > 30.0:
-            alerts.append(models.AlertItem(
-                measurement_id=m.id,
-                metric="body_fat_pct",
-                value=m.body_fat_pct,
-                message="Body fat percentage above healthy threshold",
-            ))
-
-        if m.bmi is not None and m.bmi > 30.0:
-            alerts.append(models.AlertItem(
-                measurement_id=m.id,
-                metric="bmi",
-                value=m.bmi,
-                message="BMI is in obesity range",
-            ))
-
-        if i > 0:
-            prev = measurements[i - 1]
-            if m.weight_kg - prev.weight_kg > 2.0:
-                alerts.append(models.AlertItem(
-                    measurement_id=m.id,
-                    metric="weight_kg",
-                    value=m.weight_kg,
-                    message="Rapid weight gain (>2kg since last reading)",
-                ))
+    for idx, m in enumerate(measurements):
+        if m.body_fat_pct is not None and m.body_fat_pct > 30:
+            alerts.append(models.AlertItem(measurement_id=m.id, metric='body_fat_pct', value=m.body_fat_pct, message='Body fat > 30%'))
+        if m.bmi is not None and m.bmi > 30:
+            alerts.append(models.AlertItem(measurement_id=m.id, metric='bmi', value=m.bmi, message='BMI > 30'))
+        if idx > 0:
+            prev = measurements[idx-1]
+            if m.weight_kg - prev.weight_kg > 2:
+                alerts.append(models.AlertItem(measurement_id=m.id, metric='weight_kg', value=m.weight_kg, message='Weight jump > 2kg'))
 
     return models.AlertList(alerts=alerts)
 
@@ -252,13 +283,10 @@ def get_alerts(session: Session = Depends(db.get_session)):
     response_model=models.GoalRead,
     status_code=201,
     summary="Create goal",
-    description="Set a new weight/body fat goal.",
+    description="Create a new target goal.",
     tags=["goals"],
 )
-def create_goal(
-    payload: models.GoalCreate,
-    session: Session = Depends(db.get_session),
-):
+def create_goal(payload: models.GoalCreate, session: Session = Depends(db.get_session)):
     goal = models.Goal.model_validate(payload)
     session.add(goal)
     session.commit()

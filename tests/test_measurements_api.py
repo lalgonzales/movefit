@@ -196,3 +196,27 @@ def test_measurements_pagination(client: TestClient):
     assert r2.status_code == 200
     data2 = r2.json()
     assert len(data2) >= 2
+
+def test_bulk_import_xlsx(client: TestClient, tmp_path):
+    import pandas as pd
+    from pathlib import Path
+
+    data = [
+        {'timestamp': '2026-03-20T08:00:00Z', 'device_mac': 'AA:AA:AA:AA:AA:AA', 'device_name': 'Scale A', 'weight_lb': 150.0, 'weight_kg': 68.0, 'body_fat_pct': 19.0, 'bmi': 22.8},
+        {'timestamp': '2026-03-21T08:00:00Z', 'device_mac': 'BB:BB:BB:BB:BB:BB', 'device_name': 'Scale B', 'weight_lb': 160.0, 'weight_kg': 72.6, 'body_fat_pct': 20.5, 'bmi': 24.0},
+    ]
+    df = pd.DataFrame(data)
+    file_path = tmp_path / 'measurements.xlsx'
+    df.to_excel(file_path, index=False)
+
+    with open(file_path, 'rb') as f:
+        response = client.post('/measurements/bulk-import/xlsx', files={'file': ('measurements.xlsx', f, 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet')})
+
+    assert response.status_code == 201
+    result = response.json()
+    assert result['imported'] == 2
+    assert result['skipped'] == 0
+
+    all_meas = client.get('/measurements')
+    assert all_meas.status_code == 200
+    assert any(m['device_mac'] == 'AA:AA:AA:AA:AA:AA' for m in all_meas.json())
