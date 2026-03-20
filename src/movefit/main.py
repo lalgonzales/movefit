@@ -3,8 +3,8 @@ from __future__ import annotations
 from contextlib import asynccontextmanager
 from datetime import datetime, timezone
 
-from fastapi import Depends, FastAPI, HTTPException
-from sqlmodel import Session, select
+from fastapi import Depends, FastAPI, HTTPException, Query
+from sqlmodel import Session, select, func
 
 from . import db, models
 
@@ -39,10 +39,6 @@ def create_measurement(
     if not model.weight_kg and model.weight_lb:
         model.weight_kg = model.weight_lb * 0.45359237
 
-    if not model.bmi and model.weight_kg:
-        # height is not provided; BMI cannot be derived safely without height
-        pass
-
     session.add(model)
     session.commit()
     session.refresh(model)
@@ -63,6 +59,21 @@ def read_measurements(session: Session = Depends(db.get_session)):
 
 
 @app.get(
+    "/measurements/latest",
+    response_model=models.MeasurementRead,
+    summary="Latest measurement",
+    description="Get the most recent measurement by timestamp.",
+    tags=["measurements"],
+)
+def read_latest_measurement(session: Session = Depends(db.get_session)):
+    statement = select(models.Measurement).order_by(models.Measurement.timestamp.desc()).limit(1)
+    result = session.exec(statement).first()
+    if not result:
+        raise HTTPException(status_code=404, detail="No measurements found")
+    return result
+
+
+@app.get(
     "/measurements/{measurement_id}",
     response_model=models.MeasurementRead,
     summary="Get a measurement",
@@ -74,3 +85,58 @@ def read_measurement(measurement_id: int, session: Session = Depends(db.get_sess
     if not measurement:
         raise HTTPException(status_code=404, detail="Measurement not found")
     return measurement
+
+
+@app.get(
+    "/summary",
+    response_model=models.MeasurementSummary,
+    summary="Measurement summary",
+    description="Return aggregate statistics for measurements.",
+    tags=["analytics"],
+)
+def measurement_summary(session: Session = Depends(db.get_session)):
+    statement = select(
+        func.count(models.Measurement.id),
+        func.avg(models.Measurement.weight_kg),
+        func.min(models.Measurement.weight_kg),
+        func.max(models.Measurement.weight_kg),
+        func.avg(models.Measurement.bmi),
+        func.avg(models.Measurement.body_fat_pct),
+    )
+    row = session.exec(statement).one()
+    if row[0] == 0:
+        raise HTTPException(status_code=404, detail="No measurements available")
+
+    return models.MeasurementSummary(
+        total=row[0],
+        average_weight_kg=float(row[1]) if row[1] is not None else 0.0,
+        min_weight_kg=float(row[2]),
+        max_weight_kg=float(row[3]),
+        average_bmi=float(row[4]) if row[4] is not None else None,
+        average_body_fat_pct=float(row[5]) if row[5] is not None else None,
+    )
+
+
+@app.get(
+    "/trends",
+    response_model=models.MeasurementTrends,
+    summary="Measurement trends",
+    description="Return a time series for weight and BMI.",
+    tags=["analytics"],
+)
+def measurement_trends(
+    metric: str = Query("weight", pattern="^(weight|bmi)$"),
+    session: Session = Depends(db.get_session),
+):
+    if metric not in {"weight", "bmi"}:
+        raise HTTPException(status_code=400, detail="Invalid metric")
+
+    statement = select(models.Measurement).order_by(models.Measurement.timestamp)
+    results = session.exec(statement).all()
+
+    points = [
+        models.TrendPoint(timestamp=m.timestamp, weight_kg=m.weight_kg, bmi=m.bmi)
+        for m in results
+    ]
+
+    return models.MeasurementTrends(metric=metric, points=points)

@@ -28,5 +28,25 @@ class MeasurementRead(MeasurementBase):
     id: int
 
 
+class MeasurementSummary(SQLModel):
+    total: int
+    average_weight_kg: float
+    min_weight_kg: float
+    max_weight_kg: float
+    average_bmi: Optional[float]
+    average_body_fat_pct: Optional[float]
+
+
+class TrendPoint(SQLModel):
+    timestamp: datetime
+    weight_kg: float
+    bmi: Optional[float]
+
+
+class MeasurementTrends(SQLModel):
+    metric: str
+    points: list[TrendPoint]
+
+
 class MeasurementList(SQLModel):
     measurements: list[MeasurementRead]
