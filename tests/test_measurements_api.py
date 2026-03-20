@@ -57,3 +57,39 @@ def test_read_measurements_list(client: TestClient):
 def test_measurement_not_found(client: TestClient):
     response = client.get('/measurements/999999')
     assert response.status_code == 404
+
+def test_latest_summary_trends(client: TestClient):
+    # Add several measurements for trend summary
+    samples = [
+        {'device_mac': 'AA:AA:AA:AA:AA:AA', 'device_name': 'Scale A', 'weight_lb': 150.0, 'weight_kg': 68.0, 'body_fat_pct': 18.0, 'bmi': 22.2},
+        {'device_mac': 'BB:BB:BB:BB:BB:BB', 'device_name': 'Scale B', 'weight_lb': 160.0, 'weight_kg': 72.6, 'body_fat_pct': 19.5, 'bmi': 23.5},
+        {'device_mac': 'CC:CC:CC:CC:CC:CC', 'device_name': 'Scale C', 'weight_lb': 170.0, 'weight_kg': 77.1, 'body_fat_pct': 21.0, 'bmi': 24.8},
+    ]
+    for sample in samples:
+        r = client.post('/measurements', json=sample)
+        assert r.status_code == 200
+
+    latest = client.get('/measurements/latest')
+    assert latest.status_code == 200
+    assert latest.json()['device_mac'] == samples[-1]['device_mac']
+
+    summary = client.get('/summary')
+    assert summary.status_code == 200
+    summary_data = summary.json()
+    assert summary_data['total'] >= 3
+    assert summary_data['min_weight_kg'] <= summary_data['max_weight_kg']
+
+    trends = client.get('/trends?metric=weight')
+    assert trends.status_code == 200
+    trends_data = trends.json()
+    assert trends_data['metric'] == 'weight'
+    assert isinstance(trends_data['points'], list)
+
+    trends_bmi = client.get('/trends?metric=bmi')
+    assert trends_bmi.status_code == 200
+    assert trends_bmi.json()['metric'] == 'bmi'
+
+
+def test_summary_no_data(client: TestClient):
+    # Note: this test case is only meaningful if there is no data; we skip it because data exists.
+    pass

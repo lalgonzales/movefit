@@ -3,3 +3,42 @@
 !.pixi/config.toml
 data/raw/
 .vscode/
+# Python artifacts
+__pycache__/
+*.py[cod]
+*$py.class
+*.pyo
+*.pyd
+*.env
+*.venv
+env/
+venv/
+.venv/
+ENV/
+env.bak/
+venv.bak/
+
+# IDE/artifacts
+.vscode/
+.ipynb_checkpoints/
+*.swp
+*.swo
+
+# Pytest
+.pytest_cache/
+
+# pipx, pip, etc
+pip-wheel-metadata/
+__pypackages__/
+
+# Dist
+build/
+dist/
+*.egg-info/
+*.egg
+
+# SQLite DB
+*.db
+
+# Pixi
+.pixi/envs/
