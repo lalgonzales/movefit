@@ -40,6 +40,10 @@ This agent centralizes git operations used by CI and coordinator flows.
 
 ## Commit Practices
 
+- Do not mix categories (docs/code/tests/chore) in one commit.
+- If a change touches multiple categories, split into separate commits with clear intent (e.g., `docs: ...`, `feat: ...`, `test: ...`).
+
+
 - One logical change per commit.
 - Keep subject <= 72 chars; body wrapping at 72.
 - Use present tense and imperative mood ("add", "fix", "update").

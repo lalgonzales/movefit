@@ -28,3 +28,13 @@ This file documents project agents and how to use them.
 - Cambios recientes: permisos de herramienta ajustados para cada agente según responsabilidad, y `movefit-git` no es invocable por usuario directo (desde el coordinador/CI).
 - `movefit-git` usa staging explícito y commits de estilo Conventional Commits.
 - Keep `docs/design.md` updated with agent orchestration and expected workflow.
+
+### Pixi policy
+- Agents should use `pixi` command in tasks when available.
+- Example: `pixi run test`, `pixi run python -m pytest -q`.
+- Do not assume system-wide pytest is installed.
+
+## Commit splitting policy
+- At least one commit per logical category: docs, code, tests, tooling.
+- Do not combine docs and feature code in a single commit.
+- Prefer granular commits to ease review and rollback.

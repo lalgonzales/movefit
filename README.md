@@ -19,3 +19,11 @@ Current project status: fully functional backend with measurement endpoints, ana
 1. Add CI workflow in `.github/workflows/python-app.yml`.
 2. Implement a lightweight frontend for consumption.
 3. Publish, document, and version the application.
+
+## Development with pixi
+Use `pixi` for dependency and environment management to ensure reproducible builds.
+Commands:
+- `pixi install`
+- `pixi run test` (runs pytest)
+- `pixi run python -m pytest -q`
+- `pixi run pre-commit run --all-files`
