@@ -1,8 +1,8 @@
 # Commit Message Guidelines (Conventional Commits)
 
-Para que Copilot y el flujo de CI mantengan un historial legible y utilizable, seguimos el estándar Conventional Commits:
+To keep Copilot and CI workflows readable and traceable, we follow Conventional Commits:
 
-Formato:
+Format:
 ```txt
 <type>(<scope>): <subject>
 
@@ -11,27 +11,27 @@ Formato:
 <footer>
 ```
 
-Tipos comunes:
-- feat: nueva funcionalidad
-- fix: corrección de bug
-- docs: cambios en documentación
-- style: formato/código sin lógica
-- refactor: reestructura sin comportamiento nuevo
-- perf: mejoras de rendimiento
-- test: adición/corrección de tests
-- chore: tareas de mantenimiento
+Common types:
+- feat: new feature
+- fix: bug fix
+- docs: documentation changes
+- style: formatting/code style changes without behavior
+- refactor: code restructure without new behavior
+- perf: performance improvements
+- test: add/update tests
+- chore: maintenance tasks
 
-Reglas básicas:
-- `subject` en presente y modo imperativo, max 72 caracteres.
-- `body` explicativo si se necesita contexto ampliado (72 chars wrap).
-- `footer` para tickets o BREAKING CHANGE.
-- Usa `git add -p`/`git add <files>`; evita `git add .`.
+Rules:
+- `subject` in present tense, imperative mood, max 72 chars.
+- `body` optional, with context and details.
+- `footer` for issue references or BREAKING CHANGE.
+- Prefer `git add -p` or `git add <files>`; avoid `git add .`.
 
-Ejemplo:
+Example:
 ```txt
 feat(measurement): add csv bulk import endpoint
 
-Implementa endpoint POST /measurements/bulk-import con validación de filas.
+Implement POST /measurements/bulk-import with row validation.
 
 Closes #43
 ```

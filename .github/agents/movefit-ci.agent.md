@@ -37,7 +37,7 @@ This agent creates and validates CI configurations.
   - pytest
   - `ruff check` or `flake8`, `ruff format` / `black`
   - `python -m hatchling check`
-- `.pre-commit-config.yaml` setup- Git operations para CI release flow (commit, tag, push) usando `execute/runInTerminal`
+- `.pre-commit-config.yaml` setup - Git operations for CI release flow (commit, tag, push) using `execute/runInTerminal`
 ## Deliverables
 
 - build status badge for README

@@ -28,6 +28,15 @@ Captured key columns:
 - Device MAC Address
 - Device Name
 
+
+### Source header aliasing
+- Map both English and Spanish raw headers to standard target fields to avoid ingestion errors.
+  - `Measurement time` / `Tiempo de medición` -> `timestamp`
+  - `Weight(lb)` / `Peso(lb)` -> `weight_lb`
+  - `Body Fat(%)` / `Grasa corporal(%)` -> `body_fat_pct`
+  - `Lean Weight(lb)` / `Peso magro(lb)` -> `lean_mass_lb`
+  - `Visceral Fat` / `Grasa visceral` -> `visceral_fat`
+
 ## Main models
 
 ### Measurement
@@ -101,11 +110,23 @@ MVP: SQLite + SQLModel/SQLAlchemy.
 
 ## Agent orchestration and Git operations
 
-- `movefit-coordinator` orquesta (subagentes: `movefit-fastapi`, `movefit-data`, `movefit-db`, `movefit-tests`, `movefit-ci`, `movefit-docs`, `movefit-git`).
-- `movefit-ci` gestiona la canalización de CI/CD y delega operaciones de repositorio a `movefit-git`.
+- `movefit-coordinator` orchestrates subagents: `movefit-fastapi`, `movefit-data`, `movefit-db`, `movefit-tests`, `movefit-ci`, `movefit-docs`, `movefit-git`.
+- `movefit-ci` manages CI/CD pipeline and delegates repository operations to `movefit-git`.
 - `movefit-git` ejecuta `git status`, `git add`, `git commit`, `git push`, `git tag`, `git log` usando `execute/runInTerminal`.
 - Se recomienda evitar fuerza-push automáticos y reescritura de historial en flujos de CI.
 
 ## Design license
 
 This design is the primary blueprint for `movefit`; update with changes in `docs/design.md`.
+
+## Frontend docs
+- New folder: `docs/frontend-react-vite-tailwind/`
+- Guías: overview, starter-checklist, integration.
+
+## Frontend tooling
+- Added VSCode guide in `docs/frontend-react-vite-tailwind/vscode.md`.
+- Added skill `.github/skills/movefit-frontend/SKILL.md` and prompt `.github/prompts/frontend-vite-tailwind.prompt.md`.
+
+## Frontend Tooling & Agents
+- Added guide files and agent references for React/Vite/Tailwind.
+- Added movefit-frontend agent + skill + prompt.

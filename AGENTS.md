@@ -27,4 +27,4 @@ This file documents project agents and how to use them.
 - `user-invocable:` se fija en `true` solo para el coordinador y, opcionalmente, agentes de desarrollo manual.
 - Cambios recientes: permisos de herramienta ajustados para cada agente según responsabilidad, y `movefit-git` no es invocable por usuario directo (desde el coordinador/CI).
 - `movefit-git` usa staging explícito y commits de estilo Conventional Commits.
-- Mantener `docs/design.md` actualizado con orquestación de agentes y flujo de trabajo esperado.
+- Keep `docs/design.md` updated with agent orchestration and expected workflow.
