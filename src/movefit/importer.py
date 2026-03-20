@@ -11,6 +11,7 @@ from .models import MeasurementCreate
 def read_xlsx_measurements(xlsx_path: str | Path) -> Iterable[MeasurementCreate]:
     df = pd.read_excel(xlsx_path, sheet_name=0)
 
+    # Mapping for internal API fields already in DB model
     field_map = {
         'timestamp': 'timestamp',
         'device_mac': 'device_mac',
@@ -33,9 +34,42 @@ def read_xlsx_measurements(xlsx_path: str | Path) -> Iterable[MeasurementCreate]
         'raw_source': 'raw_source',
     }
 
+    header_alias_map = {
+        'measurement time': 'timestamp',
+        'tiempo de medición': 'timestamp',
+        'weight(lb)': 'weight_lb',
+        'peso(lb)': 'weight_lb',
+        'body fat(%)': 'body_fat_pct',
+        'grasa corporal(%)': 'body_fat_pct',
+        'lean weight(lb)': 'lean_mass_lb',
+        'peso magro(lb)': 'lean_mass_lb',
+        'visceral fat': 'visceral_fat',
+        'grasa visceral': 'visceral_fat',
+        'device mac': 'device_mac',
+        'mac dispositivo': 'device_mac',
+        'device name': 'device_name',
+        'nombre dispositivo': 'device_name',
+    }
+
+    def normalize_header(name: str) -> str:
+        return str(name).strip().lower()
+
+    column_mapping: dict[str, str] = {}
+    for col in df.columns:
+        normalized = normalize_header(col)
+        if normalized in header_alias_map:
+            column_mapping[col] = header_alias_map[normalized]
+        elif normalized in field_map:
+            column_mapping[col] = field_map[normalized]
+
+    # Keep raw column names that are already internal fields.
+    for internal in field_map:
+        if internal in df.columns and internal not in column_mapping:
+            column_mapping[internal] = field_map[internal]
+
     for _, row in df.iterrows():
         payload = {}
-        for col, attr in field_map.items():
+        for col, attr in column_mapping.items():
             if col in row and pd.notna(row[col]):
                 payload[attr] = row[col]
 

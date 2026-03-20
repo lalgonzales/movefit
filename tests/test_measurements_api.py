@@ -217,6 +217,21 @@ def test_bulk_import_xlsx(client: TestClient, tmp_path):
     assert result['imported'] == 2
     assert result['skipped'] == 0
 
+    spanish_data = [
+        {'Tiempo de medición': '2026-03-22T08:00:00Z', 'Mac dispositivo': 'DD:DD:DD:DD:DD:DD', 'Nombre dispositivo': 'Scale D', 'Peso(lb)': 180.0, 'weight_kg': 81.6, 'Grasa corporal(%)': 22.1, 'bmi': 26.4},
+        {'Tiempo de medición': '2026-03-23T08:00:00Z', 'Mac dispositivo': 'EE:EE:EE:EE:EE:EE', 'Nombre dispositivo': 'Scale E', 'Peso(lb)': 190.0, 'weight_kg': 86.2, 'Grasa corporal(%)': 23.5, 'bmi': 27.0},
+    ]
+    df2 = pd.DataFrame(spanish_data)
+    file_path2 = tmp_path / 'measurements_es.xlsx'
+    df2.to_excel(file_path2, index=False)
+
+    with open(file_path2, 'rb') as f:
+        response2 = client.post('/measurements/bulk-import/xlsx', files={'file': ('measurements_es.xlsx', f, 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet')})
+    assert response2.status_code == 201
+    result2 = response2.json()
+    assert result2['imported'] == 2
+    assert result2['skipped'] == 0
+
     all_meas = client.get('/measurements')
     assert all_meas.status_code == 200
     assert any(m['device_mac'] == 'AA:AA:AA:AA:AA:AA' for m in all_meas.json())
