@@ -1,6 +1,6 @@
 ---
 name: movefit-import
-description: "Import measurements from an Excel workbook into Movefit's data model." 
+description: "Import measurements from an Excel workbook into Movefit's data model."
 argument-hint: "[xlsx-file-path]"
 user-invocable: true
 ---
