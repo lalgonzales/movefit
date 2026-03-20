@@ -93,3 +93,43 @@ def test_latest_summary_trends(client: TestClient):
 def test_summary_no_data(client: TestClient):
     # Note: this test case is only meaningful if there is no data; we skip it because data exists.
     pass
+
+def test_bulk_import_measurements(client: TestClient):
+    data = [
+        {
+            'device_mac': 'AA:AA:AA:AA:AA:AA',
+            'device_name': 'Scale A',
+            'weight_lb': 150.0,
+            'weight_kg': 68.0,
+            'body_fat_pct': 18.0,
+            'bmi': 22.2,
+        },
+        {
+            'device_mac': 'BB:BB:BB:BB:BB:BB',
+            'device_name': 'Scale B',
+            'weight_lb': 160.0,
+            'weight_kg': 72.6,
+            'body_fat_pct': 19.5,
+            'bmi': 23.5,
+        },
+        {
+            'device_mac': 'CC:CC:CC:CC:CC:CC',
+            'device_name': 'Scale C',
+            'weight_lb': 170.0,
+            'weight_kg': 77.1,
+            'body_fat_pct': 21.0,
+            'bmi': 24.8,
+        },
+    ]
+
+    response = client.post('/measurements/bulk-import', json=data)
+    assert response.status_code == 201
+    result = response.json()
+    assert result['imported'] == 3
+    assert result['skipped'] == 0
+    assert result['errors'] == []
+
+    # Verify inserted
+    all_measurements = client.get('/measurements')
+    assert all_measurements.status_code == 200
+    assert len(all_measurements.json()) >= 3

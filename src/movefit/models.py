@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 from datetime import datetime, timezone
-from typing import Optional
+from typing import List, Optional
 
 from sqlmodel import Field, SQLModel
 
@@ -46,6 +46,12 @@ class TrendPoint(SQLModel):
 class MeasurementTrends(SQLModel):
     metric: str
     points: list[TrendPoint]
+
+
+class BulkImportResult(SQLModel):
+    imported: int
+    skipped: int
+    errors: List[str]
 
 
 class MeasurementList(SQLModel):
