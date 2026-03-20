@@ -17,7 +17,12 @@ platforms = ["linux-64"]
 movefit = { path = ".", editable = true }
 
 [tool.pixi.tasks]
+test = "pytest -q"
 
 [tool.pixi.dependencies]
 pandas = ">=3.0.1,<4"
 openpyxl = ">=3.1.5,<4"
+fastapi = ">=0.135.1,<0.136"
+sqlmodel = ">=0.0.37,<0.0.38"
+uvicorn = ">=0.42.0,<0.43"
+pytest = ">=9.0.2,<10"
