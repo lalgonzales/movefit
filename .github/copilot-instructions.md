@@ -48,3 +48,10 @@ description: "Workspace instructions for the movefit Python package. Use for cod
 
 - If different scopes emerge (CLI, API, ingestion), add specific `*.instructions.md` files under `.github/instructions/` with `applyTo` patterns.
 - Add a `.github/hooks/pre-commit` hook to run formatting and static checks.
+
+## Example prompts for this workspace
+
+- "Implement a `movefit` package function that computes body-mass-index with type hints and tests."
+- "Add a new module `src/movefit/metrics.py` plus `tests/test_metrics.py` with pytest coverage."
+- "Update `pyproject.toml` to add `pytest` and `coverage` in `[project.optional-dependencies]`."
+- "Create a `.github/workflows/python-package.yml` for CI run test/build/lint steps."
