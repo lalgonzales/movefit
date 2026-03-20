@@ -65,6 +65,13 @@ Example request:
 ## GET /measurements
 
 Query params:
+- `offset` (int, default 0, implemented)
+- `limit` (int, default 100, max 1000, implemented)
+- `from` (datetime, optional, partial implementation: TBD)
+- `to` (datetime, optional, partial implementation: TBD)
+- `sort` (string, optional, planned)
+
+
 - `offset` (int, default 0)
 - `limit` (int, default 100, max 1000)
 - `from` (datetime, optional)
@@ -84,6 +91,20 @@ Response 200: last Measurement by timestamp.
 ## GET /summary
 
 Query params:
+- `from` (datetime, optional, not implemented yet)
+- `to` (datetime, optional, not implemented yet)
+
+Response 200:
+- `count` (implemented as `total`)
+- `weight_avg` (implemented as `average_weight_kg`)
+- `weight_delta` (not yet implemented)
+- `body_fat_avg` (implemented)
+- `body_fat_delta` (not yet implemented)
+- `bmi_avg` (implemented)
+- `bmi_delta` (not yet implemented)
+- `trend` (planned: currently category trend in `/trends`)
+
+
 - `from` (datetime, optional)
 - `to` (datetime, optional)
 
@@ -97,6 +118,15 @@ Response 200:
 ## GET /trends
 
 Query params:
+- `window` (int, default 7, not yet implemented, currently full history)
+- `metric` (str, one of `weight`, `body_fat`, `bmi`, implemented as `weight|bmi`)
+
+Response 200:
+- `points`: list of `{timestamp, value}` (implemented in /trends)
+- `slope` (implemented)
+- `category` (implemented)
+
+
 - `window` (int, default 7)
 - `metric` (str, one of `weight`, `body_fat`, `bmi`)
 
@@ -107,7 +137,10 @@ Response 200:
 
 ## POST /measurements/bulk-import
 
-Accepts JSON array or file upload (TODO):
+Accepts JSON array (implemented); file upload TODO:
+- each row same fields as `/measurements`.
+
+
 - each row same fields as `/measurements`.
 
 Response 201:

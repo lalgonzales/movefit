@@ -56,15 +56,18 @@ Captured key columns:
 ## Planned endpoints
 
 - POST /measurements
-- POST /measurements/bulk-import
+- POST /measurements/bulk-import (implemented JSON bulk import; XLSX parser planned)
+- GET /alerts (implemented)
+- POST /goals (implemented)
+- GET /goals (implemented)
 - GET /measurements
 - GET /measurements/{id}
 - GET /measurements/latest
-- GET /summary
-- GET /trends
-- GET /alerts
-- POST /goals
-- GET /goals
+- GET /summary (implemented, range filter pending)
+- GET /trends (implemented, window param pending)
+- GET /alerts (implemented)
+- POST /goals (implemented)
+- GET /goals (implemented)
 
 ## Persistence
 
