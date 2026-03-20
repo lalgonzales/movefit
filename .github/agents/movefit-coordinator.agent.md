@@ -65,3 +65,24 @@ Expected output:
 - Plan 5: CI.
 - Invoke fastapi agent with payload X.
 ```
+
+## Agent governance
+
+- Evaluate specialized agents and identify improvement opportunities in prompts, skills, and tools.
+- For each delivered change, ensure an agent-level retrospective (success/fail).
+- If agents are not meeting expectations, update manifests and escalate to team.
+
+
+- Continuously evaluate specialized agents (`movefit-fastapi`, `movefit-docs`, `movefit-tests`, etc.).
+- Detect gaps in capabilities (prompts, skill definitions, tools permissions).
+- Propose updates to agent manifests and `.github/skills` when requested.
+- Track agent performance: inputs produced, output quality, edge cases detected.
+- Si un agente identifica necesidad de un nuevo Prompt/Skill/Tool, coordinar su creación.
+- Maintain direct feedback loop with the team (explicit OK before finalizing branch).
+
+## Coordinator obligations
+
+- Aprovechar los agents para cada fase del flujo: documentar, crear tests, fijar CI, investigar bugs.
+- Listen to requirements and generate an iterative delivery plan.
+- Do not finalize commits until explicit "branch complete" confirmation.
+- Guardar el estado de avance y proponer checkpoints de revisión con el usuario.

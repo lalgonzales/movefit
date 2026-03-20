@@ -13,9 +13,9 @@ This skill parses XLSX data and produces normalized records for the `Measurement
 
 1. Read the workbook and sheet (default `Sheet1`).
 2. Map columns:
-   - `Tiempo de medición` -> `timestamp`
-   - `Peso(lb)` -> `weight_lb`
-   - `Grasa corporal(%)` -> `body_fat_pct`
+   - `Measurement time` -> `timestamp`
+   - `Weight(lb)` -> `weight_lb`
+   - `Body fat(%)` -> `body_fat_pct`
    - ...
 3. Normalize units (lb -> kg, % -> fraction optional).
 4. Validate ranges and required fields.
@@ -25,6 +25,14 @@ This skill parses XLSX data and produces normalized records for the `Measurement
 ## Example command
 
 `/movefit-import data/raw/Indice_fisico-20260318150059.xlsx`
+
+
+## Source column aliasing
+- Support both English and Spanish source headers to avoid parser mismatch:
+  - `Measurement time` / `Tiempo de medición` -> `timestamp`
+  - `Weight(lb)` / `Peso(lb)` -> `weight_lb`
+  - `Body fat(%)` / `Grasa corporal(%)` -> `body_fat_pct`
+  - `Lean Weight(lb)` / `Peso magro(lb)` -> `lean_mass_lb`
 
 ## References
 

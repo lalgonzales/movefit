@@ -1,9 +1,8 @@
 # Frontend Team Guide: React + Vite + Tailwind
 
-Objetivo: crear la app de cliente para Movefit con stack moderno (React, Vite, Tailwind). 
+Objective: build the Movefit frontend client with a modern stack (React, Vite, Tailwind).
 
-
-dependencias recomendadas:
+Recommended dependencies:
 - react 18+
 - react-dom 18+
 - vite 5+
@@ -11,14 +10,14 @@ dependencias recomendadas:
 - postcss 8+
 - autoprefixer 10+
 
-Arquitectura propuesta:
-- `src/components/` UI genéricos
-- `src/pages/` vistas (dashboard, measurements, goals, trends)
-- `src/api/` servicios Fetch/axios para endpoints backend
-- `src/lib/` utilidades, formatos de fecha, validadores
-- `src/styles/` tokens y extensiones Tailwind
+Proposed architecture:
+- `src/components/` common UI components
+- `src/pages/` views (dashboard, measurements, goals, trends)
+- `src/api/` Fetch/axios integrations for backend endpoints
+- `src/lib/` utilities, date formatting, validators
+- `src/styles/` tokens and Tailwind extensions
 
-Enfoque:
-- MVP first: ingesta + timeline + resumen + objetivos
-- API friendly y feature flags (modo local/dev/production)
-- pruebas: vitest + @testing-library/react + msw
+Approach:
+- MVP first: ingestion + timeline + summary + goals
+- API-friendly and feature flags (local/dev/production modes)
+- testing: vitest + @testing-library/react + msw

@@ -1,22 +1,24 @@
 # Backend Integration (API Contract)
 
-## Endpoints principales
+## Core endpoints
 
-- GET `/measurements` (filtros: from, to, device_mac)
-- POST `/measurements` con body de lectura
-- GET `/summary` (param date-range)
-- GET `/trends` (param window: daily/weekly/monthly)
-- GET `/alerts` y POST `/goals`
+- GET `/measurements` (params: from, to, device_mac)
+- POST `/measurements` (body: measurement payload)
+- GET `/summary` (params: date-range)
+- GET `/trends` (params: window: daily, weekly, monthly)
+- GET `/alerts`, POST `/goals`
 
-## Ejemplo fetch
+## Fetch example
 
 ```ts
 import axios from 'axios';
+
 const api = axios.create({ baseURL: import.meta.env.VITE_API_BASE_URL });
 
-export const getMeasurements = (params) => api.get('/measurements', { params });
+export const getMeasurements = (params: Record<string, unknown>) => api.get('/measurements', { params });
 ```
 
 ## Auth / headers
 
-- Inicialmente sin auth (MVP), luego JWT Authorization header `Bearer <token>`.
+- MVP stage: no auth.
+- Later: JWT authorization header `Authorization: Bearer <token>`.
