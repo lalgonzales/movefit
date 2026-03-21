@@ -40,6 +40,16 @@ This agent centralizes git operations used by CI and coordinator flows.
 
 ## Commit Practices
 
+## GitHub CLI Support
+
+- If `gh` CLI is available, use it to create pull requests as part of automation.
+- Require environment token `GH_TOKEN` or `GITHUB_TOKEN` for `gh auth login --with-token`.
+- Example:
+  ```bash
+  gh auth login --with-token <<< "$GH_TOKEN"
+  gh pr create --base main --head feature/frontend-mvp --title "feat: frontend + API + tests + docs"     --body "Implementa endpoints y frontend scaffold completado."
+  ```
+
 - Do not mix categories (docs/code/tests/chore) in one commit.
 - If a change touches multiple categories, split into separate commits with clear intent (e.g., `docs: ...`, `feat: ...`, `test: ...`).
 

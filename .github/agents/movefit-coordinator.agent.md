@@ -31,9 +31,14 @@ user-invocable: true
 
 This agent is the entry point for full feature flow orchestration.
 
+## Development policy
+
+- Standard: write documentation and comments in English; worksheets raw header names may remain in original language.
+- This is a `pixi` managed project. Use `pixi` for all dependency and environment management to ensure reproducibility. Avoid manual `pip` installs outside of `pixi` commands.
+
 ## Objective
 
-- Consume high-level requirements (e.g. “create measurements API and trend summary”).
+- Consume high-level requirements (e.g. "create measurements API and trend summary").
 - Divide work into specialized subagents:
   - `movefit-fastapi`: endpoints and routes.
   - `movefit-data`: metrics calculations.
@@ -77,12 +82,12 @@ Expected output:
 - Detect gaps in capabilities (prompts, skill definitions, tools permissions).
 - Propose updates to agent manifests and `.github/skills` when requested.
 - Track agent performance: inputs produced, output quality, edge cases detected.
-- Si un agente identifica necesidad de un nuevo Prompt/Skill/Tool, coordinar su creación.
+- If an agent identifies a need for a new Prompt/Skill/Tool, coordinate its creation.
 - Maintain direct feedback loop with the team (explicit OK before finalizing branch).
 
 ## Coordinator obligations
 
-- Aprovechar los agents para cada fase del flujo: documentar, crear tests, fijar CI, investigar bugs.
+- Leverage agents for each phase: document, create tests, set up CI, investigate bugs.
 - Listen to requirements and generate an iterative delivery plan.
 - Do not finalize commits until explicit "branch complete" confirmation.
-- Guardar el estado de avance y proponer checkpoints de revisión con el usuario.
+- Track progress state and propose review checkpoints with the user.

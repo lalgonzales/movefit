@@ -26,6 +26,8 @@ description: "Workspace instructions for the movefit Python package. Use for cod
 
 ## Code conventions
 
+- Prefer English for all documentation and comments; exception: raw Excel header names stay in source language.
+
 - Follow idiomatic Python 3.11.
 - Keep code small and focused in `src/movefit`.
 - Use type hints and documentation for public API in functions/classes.

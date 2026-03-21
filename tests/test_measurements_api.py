@@ -22,6 +22,7 @@ def client() -> TestClient:
 
     app.dependency_overrides[db.get_session] = get_session_override
 
+    app.state._test_engine = engine
     with TestClient(app) as client:
         yield client
 
@@ -91,9 +92,23 @@ def test_latest_summary_trends(client: TestClient):
 
 
 def test_summary_no_data(client: TestClient):
-    # Note: this test case is only meaningful if there is no data; we skip it because data exists.
-    pass
+    # Reset DB by creating a new session or assuming test ordering allows empty DB scenario
+    # Here we use a separate endpoint with clean session by re-initializing if needed.
+    # For module-scope fixture we can only assert summary returns structured response when no measurement exists
+    # This is a soft compatibility check for /summary no-data behavior.
+    # Delete all measurements before call
+    # Use the test engine bound to the TestClient fixture to avoid touching disk DB.
+    with Session(client.app.state._test_engine) as session:
+        session.execute(text('DELETE FROM measurement'))
+        session.commit()
 
+    response = client.get('/summary')
+    assert response.status_code == 200
+    data = response.json()
+    assert data['total'] == 0
+    assert data['average_weight_kg'] == 0.0
+    assert data['min_weight_kg'] == 0.0
+    assert data['max_weight_kg'] == 0.0
 def test_bulk_import_measurements(client: TestClient):
     data = [
         {

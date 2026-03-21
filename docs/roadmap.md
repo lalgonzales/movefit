@@ -6,7 +6,7 @@
 2. Base models and schemas:
    - `Measurement`, `Goal`, `Summary` (SQLModel)
    - `MeasurementCreate`, `MeasurementRead`, `GoalCreate`, etc.
-3. Database setup and session dependency (SQLModel + SQLite local + easy to switch to PostgreSQL)
+3. Database setup and session dependency (SQLModel + SQLite local + easy switch to PostgreSQL)
 4. FastAPI routes for CRUD and reporting as in API spec
 5. Unit tests for data calculations + API tests with `TestClient`
 6. CI pipeline (pytest + hatchling + pre-commit)
@@ -24,7 +24,7 @@
   - `GET /alerts`, `POST /alerts` for user-defined rules
 - Trends engine:
   - 7-day, 30-day rolling averages
-  - slope generation (Regression) and category classification
+  - slope calculation (regression) and category classification
   - cached periodic recomputation to avoid heavy aggregation on every call
 - User profiles and devices:
   - multi-tenant support

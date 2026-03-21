@@ -22,17 +22,16 @@ This file documents project agents and how to use them.
 
 ## Agent metadata and standardization
 
-- Cada agente tiene definición en `.github/agents/<agent>.agent.md` con frontmatter YAML.
-- `tools:` debe limitarse a las capacidades requeridas por el rol (principio de menor privilegio).
-- `user-invocable:` se fija en `true` solo para el coordinador y, opcionalmente, agentes de desarrollo manual.
-- Cambios recientes: permisos de herramienta ajustados para cada agente según responsabilidad, y `movefit-git` no es invocable por usuario directo (desde el coordinador/CI).
-- `movefit-git` usa staging explícito y commits de estilo Conventional Commits.
+- Each agent has a definition in `.github/agents/<agent>.agent.md` with YAML frontmatter.
+- `tools:` should be limited to role-required capabilities (principle of least privilege).
+- `user-invocable:` is set to `true` only for the coordinator and optionally manual development agents.
+- Recent changes: tool permissions are adjusted per agent responsibility, and `movefit-git` is not invocable directly by a user (from coordinator/CI).
+- `movefit-git` uses explicit staging and Conventional Commits style.
 - Keep `docs/design.md` updated with agent orchestration and expected workflow.
 
 ### Pixi policy
-- Agents should use `pixi` command in tasks when available.
-- Example: `pixi run test`, `pixi run python -m pytest -q`.
-- Do not assume system-wide pytest is installed.
+- This is a pixi managed project. Use `pixi` for all dependency and environment management to ensure reproducibility.
+- Avoid manual `pip` installs outside of `pixi` commands.
 
 ## Commit splitting policy
 - At least one commit per logical category: docs, code, tests, tooling.
