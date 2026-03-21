@@ -8,9 +8,10 @@ from typing import Any
 
 import pandas as pd
 from fastapi import Depends, FastAPI, File, Form, HTTPException, Query, UploadFile
+from fastapi.middleware.cors import CORSMiddleware
 from sqlmodel import Session, select, func
 
-from . import db, importer, models
+from . import db, importer, metrics, models
 
 
 @asynccontextmanager
@@ -26,6 +27,13 @@ app = FastAPI(
     lifespan=lifespan,
 )
 
+app.add_middleware(CORSMiddleware, allow_origins=['*'], allow_credentials=True, allow_methods=['*'], allow_headers=['*'])
+
+
+
+@app.get('/healthz', summary='Health check', tags=['health'])
+def healthz():
+    return {'status': 'ok'}
 
 @app.post(
     "/measurements",
@@ -41,7 +49,7 @@ def create_measurement(
     model = models.Measurement.model_validate(payload)
 
     if not model.weight_kg and model.weight_lb:
-        model.weight_kg = model.weight_lb * 0.45359237
+        model.weight_kg = metrics.weight_lb_to_kg(model.weight_lb)
 
     session.add(model)
     session.commit()
@@ -96,7 +104,7 @@ def bulk_import_measurements(
         try:
             measurement = models.MeasurementCreate.model_validate(row)
             if not measurement.weight_kg and measurement.weight_lb:
-                measurement.weight_kg = measurement.weight_lb * 0.45359237
+                measurement.weight_kg = metrics.weight_lb_to_kg(measurement.weight_lb)
 
             db_model = models.Measurement.model_validate(measurement)
             session.add(db_model)
@@ -135,7 +143,7 @@ def bulk_import_measurements_xlsx(
         for idx, measurement in enumerate(importer.read_xlsx_measurements(tmp_path)):
             try:
                 if not measurement.weight_kg and measurement.weight_lb:
-                    measurement.weight_kg = measurement.weight_lb * 0.45359237
+                    measurement.weight_kg = metrics.weight_lb_to_kg(measurement.weight_lb)
 
                 db_model = models.Measurement.model_validate(measurement)
                 session.add(db_model)
@@ -204,7 +212,7 @@ def measurement_summary(session: Session = Depends(db.get_session)):
     )
     row = session.exec(statement).one()
     if row[0] == 0:
-        raise HTTPException(status_code=404, detail="No measurements available")
+        return models.MeasurementSummary(total=0, average_weight_kg=0.0, min_weight_kg=0.0, max_weight_kg=0.0, average_bmi=None, average_body_fat_pct=None)
 
     return models.MeasurementSummary(
         total=row[0],
@@ -237,13 +245,7 @@ def measurement_trends(
 
     slope = 0.0
     if len(points) > 1:
-        x_vals = list(range(len(points)))
-        y_vals = [p.value for p in points]
-        mean_x = sum(x_vals)/len(x_vals)
-        mean_y = sum(y_vals)/len(y_vals)
-        num = sum((x-mean_x)*(y-mean_y) for x,y in zip(x_vals,y_vals))
-        den = sum((x-mean_x)**2 for x in x_vals)
-        slope = num/den if den else 0.0
+        slope = metrics.calculate_slopeline([(p.timestamp, p.value) for p in points])
 
     category = "stable"
     if slope > 0.01:
