@@ -22,8 +22,12 @@ Current project status: fully functional backend with measurement endpoints, ana
 
 ## Development with pixi
 Use `pixi` for dependency and environment management to ensure reproducible builds.
-Commands:
+Direct Python invocations are not allowed outside `pixi` control (policy enforcement). Use these exact commands:
 - `pixi install`
 - `pixi run test` (runs pytest)
 - `pixi run python -m pytest -q`
+- `pixi run python -m hatchling check`
+- `pixi run python -m hatchling build`
 - `pixi run pre-commit run --all-files`
+
+> Do not run `python -m pytest` or `python -m hatchling` directly; always run through `pixi run ...` to comply with project policy.

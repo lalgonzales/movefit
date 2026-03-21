@@ -2,9 +2,9 @@
 
 ## Overview
 
-- App: FastAPI backend for ingestion/query/analysis of body composition data (weight, fat, muscle, etc.).
+- App: FastAPI backend for ingesting/querying/analyzing body composition data (weight, fat, muscle, etc.).
 - MVP goal: measurement ingestion + timeline + metric summary + goals.
-- Initial input: Excel dump with scale readings (`Índice_físico-Feelfit...`).
+- Initial input: Excel dump with scale readings (`Physical_Index-Feelfit...`).
 
 ## Initial dataset (sheet1)
 
@@ -28,9 +28,8 @@ Captured key columns:
 - Device MAC Address
 - Device Name
 
-
 ### Source header aliasing
-- Map both English and Spanish raw headers to standard target fields to avoid ingestion errors.
+- Map raw headers in both English and Spanish to standard fields to avoid ingestion errors.
   - `Measurement time` / `Tiempo de medición` -> `timestamp`
   - `Weight(lb)` / `Peso(lb)` -> `weight_lb`
   - `Body Fat(%)` / `Grasa corporal(%)` -> `body_fat_pct`
@@ -74,9 +73,6 @@ Captured key columns:
 - GET /measurements/latest
 - GET /summary (implemented, range filter pending)
 - GET /trends (implemented, window param pending)
-- GET /alerts (implemented)
-- POST /goals (implemented)
-- GET /goals (implemented)
 
 ## Persistence
 
@@ -88,17 +84,17 @@ MVP: SQLite + SQLModel/SQLAlchemy.
 - `tests/` - unit tests
 - `docs/design.md` - this document
 - `data/raw/` - original XLSX files (versioned as needed; usually `.gitignore`)
-- `data/processed/` - CSV/JSON export from import process
+- `data/processed/` - CSV/JSON export from the import process
 
 ## Excel data flow proposal
 
-1. Store original XLSX files in `data/raw/` (dev only). Example: `data/raw/Indice_fisico-2026...xlsx`.
+1. Store original XLSX files in `data/raw/` (dev only). Example: `data/raw/Physical_Index-2026...xlsx`.
 2. Track versions in `README` or `data/README.md`:
    - date
    - source
    - cleanup notes
-3. In CI/production, manage via `POST /measurements/bulk-import` endpoint and/or script `scripts/import_xlsx.py`.
-4. Do not commit large raw data files into the main repository in production. Use dedicated storage (S3, Google Drive, etc.) and version-only metadata.
+3. In CI/production use `POST /measurements/bulk-import` and/or script `scripts/import_xlsx.py`.
+4. Do not commit large raw data files in main repository in production. Use dedicated storage (S3, Google Drive, etc.) and version only metadata.
 
 ## Roadmap (simple to complex)
 
@@ -111,22 +107,25 @@ MVP: SQLite + SQLModel/SQLAlchemy.
 ## Agent orchestration and Git operations
 
 - `movefit-coordinator` orchestrates subagents: `movefit-fastapi`, `movefit-data`, `movefit-db`, `movefit-tests`, `movefit-ci`, `movefit-docs`, `movefit-git`.
-- `movefit-ci` manages CI/CD pipeline and delegates repository operations to `movefit-git`.
-- `movefit-git` ejecuta `git status`, `git add`, `git commit`, `git push`, `git tag`, `git log` usando `execute/runInTerminal`.
-- Se recomienda evitar fuerza-push automáticos y reescritura de historial en flujos de CI.
+- `movefit-ci` manages CI/CD pipeline and delegates repository ops to `movefit-git`.
+- `movefit-git` executes `git status`, `git add`, `git commit`, `git push`, `git tag`, `git log` via terminal.
+- Avoid force push and history rewrite in CI workflows.
 
 ## Design license
 
-This design is the primary blueprint for `movefit`; update with changes in `docs/design.md`.
+This design is the primary blueprint for `movefit`; update it in `docs/design.md` for changes.
 
 ## Frontend docs
+
 - New folder: `docs/frontend-react-vite-tailwind/`
-- Guías: overview, starter-checklist, integration.
+- Guides: overview, starter-checklist, integration.
 
 ## Frontend tooling
+
 - Added VSCode guide in `docs/frontend-react-vite-tailwind/vscode.md`.
 - Added skill `.github/skills/movefit-frontend/SKILL.md` and prompt `.github/prompts/frontend-vite-tailwind.prompt.md`.
 
 ## Frontend Tooling & Agents
+
 - Added guide files and agent references for React/Vite/Tailwind.
 - Added movefit-frontend agent + skill + prompt.
