@@ -27,7 +27,7 @@ description: "Workspace instructions for the movefit Python package. Use for cod
 ## Pixi usage
 
 - `pixi task test` to run test suite (`pytest -q`).
-- `pixi task build` to run project build steps (hatchling build). 
+- `pixi task build` to run project build steps (hatchling build).
 - `pixi task shell` for interactive environment (if configured by maintainer).
 
 ## Troubleshooting
