@@ -1,4 +1,4 @@
----
+----
 name: movefit-fastapi
 description: "FastAPI implementation agent for movefit. Build REST endpoints with Pydantic and SQLModel."
 tools:
@@ -15,7 +15,7 @@ agents:
   - movefit-tests
 model: Raptor mini (Preview) (copilot)
 user-invocable: false
----
+----
 
 # Movefit FastAPI Agent
 

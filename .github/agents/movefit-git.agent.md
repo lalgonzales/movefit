@@ -1,4 +1,4 @@
----
+----
 name: movefit-git
 description: "Git helper agent for Movefit: perform repository operations from CI/coordinator workflows."
 tools:
@@ -11,7 +11,7 @@ tools:
 agents: []
 model: Raptor mini (Preview) (copilot)
 user-invocable: false
----
+----
 
 # Movefit Git Agent
 
@@ -47,17 +47,11 @@ This agent centralizes git operations used by CI and coordinator flows.
 - Example:
   ```bash
   gh auth login --with-token <<< "$GH_TOKEN"
-  gh pr create --base main --head feature/frontend-mvp --title "feat: frontend + API + tests + docs"     --body "Implementa endpoints y frontend scaffold completado."
+  gh pr create --base main --head feature/frontend-mvp --title "feat: frontend + API + tests + docs" --body "Implementa endpoints y frontend scaffold completado."
   ```
 
 - Do not mix categories (docs/code/tests/chore) in one commit.
 - If a change touches multiple categories, split into separate commits with clear intent (e.g., `docs: ...`, `feat: ...`, `test: ...`).
-
-
-- One logical change per commit.
-- Keep subject <= 72 chars; body wrapping at 72.
-- Use present tense and imperative mood ("add", "fix", "update").
-- Document breaking changes with `BREAKING CHANGE:` in body.
 
 ## Handoff
 

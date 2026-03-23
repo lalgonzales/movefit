@@ -1,4 +1,4 @@
----
+----
 name: movefit-frontend
 description: "Frontend agent for Movefit: React + Vite + Tailwind implementation guidance and docs."
 tools:
@@ -13,13 +13,14 @@ agents:
   - movefit-ci
 model: Raptor mini (Preview) (copilot)
 user-invocable: false
----
+----
 
 # Movefit Frontend Agent
 
 This agent covers the React+Vite+Tailwind frontend team activities.
 
 ## Responsibilities
+
 - Generate setup and best practice documentation.
 - Create integration guide with backend endpoints and contracts.
 - Propose folder structure for `src/` and atomic components.
@@ -32,6 +33,7 @@ This agent covers the React+Vite+Tailwind frontend team activities.
 4. Report status to `movefit-coordinator` before marking branch as complete.
 
 ## Expected output
+
 - new documentation files
 - optional `pyproject.toml` dev dependencies
 - PR draft in feature branch ready for review

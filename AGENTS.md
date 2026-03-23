@@ -20,6 +20,19 @@ This file documents project agents and how to use them.
 3. Validate output with `movefit-tests` and `movefit-ci`.
 4. Update `docs/design.md` via `movefit-docs`.
 
+## Recommended minimal agent set
+
+- `movefit-coordinator` (required): orchestration point.
+- `movefit-tests` (required): test and regression validation.
+- `movefit-ci` (required): CI pipeline checks and lint enforcement.
+- `movefit-git` (optional): workflow automation for commit/push.
+- `movefit-data`, `movefit-db`, `movefit-fastapi`, `movefit-docs`, `movefit-frontend` (keep only when a clear team ownership or process need exists).
+
+## When to prune
+
+- If an agent file is no longer referenced in active workflows, remove it and keep an audit in a single changelog section (e.g., `docs/agent-cleanup.md`).
+- Prioritize reducing duplication in `copilot-instructions.md` and `agent-customization.instructions.md`.
+
 ## Agent metadata and standardization
 
 - Each agent has a definition in `.github/agents/<agent>.agent.md` with YAML frontmatter.
@@ -37,3 +50,7 @@ This file documents project agents and how to use them.
 - At least one commit per logical category: docs, code, tests, tooling.
 - Do not combine docs and feature code in a single commit.
 - Prefer granular commits to ease review and rollback.
+- Use Conventional Commits with detailed body and footer for each commit:
+  - body: background + what/why/how + test steps
+  - footer: issue references / `BREAKING CHANGE` / co-author info
+- Avoid one-line/bare subjects like `update(docs): xyz` without context.
