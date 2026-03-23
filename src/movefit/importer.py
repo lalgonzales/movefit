@@ -8,7 +8,7 @@ import pandas as pd
 from .models import MeasurementCreate
 
 
-def read_xlsx_measurements(xlsx_path: str | Path) -> Iterable[MeasurementCreate]:
+def read_xlsx_measurements(xlsx_path: str | Path, error_log: list[str] | None = None) -> Iterable[MeasurementCreate]:
     df = pd.read_excel(xlsx_path, sheet_name=0)
 
     # Mapping for internal API fields already in DB model
@@ -67,7 +67,8 @@ def read_xlsx_measurements(xlsx_path: str | Path) -> Iterable[MeasurementCreate]
         if internal in df.columns and internal not in column_mapping:
             column_mapping[internal] = field_map[internal]
 
-    for _, row in df.iterrows():
+    for idx, row in enumerate(df.iterrows()):
+        _, row = row
         payload = {}
         for col, attr in column_mapping.items():
             if col in row and pd.notna(row[col]):
@@ -75,5 +76,10 @@ def read_xlsx_measurements(xlsx_path: str | Path) -> Iterable[MeasurementCreate]
 
         try:
             yield MeasurementCreate(**payload)
-        except Exception:
-            continue
+        except Exception as exc:
+            message = f"row[{idx}] parse error: {exc}"
+            if error_log is not None:
+                error_log.append(message)
+            else:
+                raise
+

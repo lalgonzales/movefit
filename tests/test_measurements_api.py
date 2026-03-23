@@ -27,6 +27,22 @@ def client() -> TestClient:
         yield client
 
 
+
+
+def test_create_measurement_derive_weight_kg(client: TestClient):
+    payload = {
+        'device_mac': '11:22:33:44:55:66',
+        'device_name': 'Feelfit scale',
+        'weight_lb': 154.3,
+        'body_fat_pct': 20.5,
+        'bmi': 22.86,
+    }
+
+    response = client.post('/measurements', json=payload)
+    assert response.status_code == 200
+    result = response.json()
+    assert result['weight_kg'] == pytest.approx(69.97, rel=1e-3)
+
 def test_create_and_read_measurement(client: TestClient):
     payload = {
         'device_mac': '00:11:22:33:44:55',
@@ -85,10 +101,15 @@ def test_latest_summary_trends(client: TestClient):
     trends_data = trends.json()
     assert trends_data['metric'] == 'weight'
     assert isinstance(trends_data['points'], list)
+    assert 'slope' in trends_data
+    assert 'category' in trends_data
+
 
     trends_bmi = client.get('/trends?metric=bmi')
     assert trends_bmi.status_code == 200
     assert trends_bmi.json()['metric'] == 'bmi'
+    assert 'slope' in trends_bmi.json()
+    assert 'category' in trends_bmi.json()
 
 
 def test_summary_no_data(client: TestClient):

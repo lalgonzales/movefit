@@ -11,7 +11,7 @@ class MeasurementBase(SQLModel):
     device_mac: str
     device_name: Optional[str] = None
     weight_lb: float
-    weight_kg: float
+    weight_kg: Optional[float] = None
     body_fat_pct: Optional[float] = None
     bmi: Optional[float] = None
 
@@ -31,9 +31,9 @@ class MeasurementRead(MeasurementBase):
 # analytics models
 class MeasurementSummary(SQLModel):
     total: int
-    average_weight_kg: float
-    min_weight_kg: float
-    max_weight_kg: float
+    average_weight_kg: Optional[float] = None
+    min_weight_kg: Optional[float] = None
+    max_weight_kg: Optional[float] = None
     average_bmi: Optional[float]
     average_body_fat_pct: Optional[float]
 
@@ -46,6 +46,8 @@ class TrendPoint(SQLModel):
 class MeasurementTrends(SQLModel):
     metric: str
     points: List[TrendPoint]
+    slope: float
+    category: str
 
 
 class BulkImportResult(SQLModel):
