@@ -103,7 +103,7 @@ def bulk_import_measurements(
     for idx, row in enumerate(payload):
         try:
             measurement = models.MeasurementCreate.model_validate(row)
-            if not measurement.weight_kg and measurement.weight_lb:
+            if (measurement.weight_kg is None or measurement.weight_kg == 0) and measurement.weight_lb:
                 measurement.weight_kg = metrics.weight_lb_to_kg(measurement.weight_lb)
 
             db_model = models.Measurement.model_validate(measurement)
@@ -140,9 +140,9 @@ def bulk_import_measurements_xlsx(
         tmp_path = Path(tmp.name)
 
     try:
-        for idx, measurement in enumerate(importer.read_xlsx_measurements(tmp_path)):
+        for idx, measurement in enumerate(importer.read_xlsx_measurements(tmp_path, error_log=errors)):
             try:
-                if not measurement.weight_kg and measurement.weight_lb:
+                if (measurement.weight_kg is None or measurement.weight_kg == 0) and measurement.weight_lb:
                     measurement.weight_kg = metrics.weight_lb_to_kg(measurement.weight_lb)
 
                 db_model = models.Measurement.model_validate(measurement)
