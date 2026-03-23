@@ -22,6 +22,6 @@ When the user asks to reset local Git state to a clean `main` branch and prepare
 - Always confirm the current branch before switching.
 - Run `git fetch --prune` first.
 - Use `git checkout main`, then `git pull`.
-- Cleanup local branches hidden by `git branch --merged main` except main.
+- Cleanup local branches hidden by `git branch --merged main` except main and if the user confirms that PR is merged delete local branches with `git branch -d <branch>` and with `git branch -D <branch>` for unmerged branches.
 - Run `git remote prune origin`.
 - Report success state: on main, up to date, no local stale branches.

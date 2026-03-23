@@ -23,8 +23,15 @@ Common types:
 
 Rules:
 - `subject` in present tense, imperative mood, max 72 chars.
-- `body` optional, with context and details.
-- `footer` for issue references or BREAKING CHANGE.
+- `body` strongly recommended for all non-trivial commits, with:
+  - what changed
+  - why it changed
+  - impact/side effects (if any)
+  - test instructions (if applicable)
+- `footer` strongly recommended for references and releasability info:
+  - `Closes #<issue>`
+  - `BREAKING CHANGE: ...`
+  - `Co-authored-by: ...`
 - Prefer `git add -p` or `git add <files>`; avoid `git add .`.
 
 Example:
@@ -32,6 +39,11 @@ Example:
 feat(measurement): add csv bulk import endpoint
 
 Implement POST /measurements/bulk-import with row validation.
+- support multiple rows
+- report parse errors with row-context
+- skip empty lines and trim whitespace
+
+Add `tests/test_measurements_api.py::test_bulk_import_success`.
 
 Closes #43
 ```

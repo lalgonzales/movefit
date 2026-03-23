@@ -1,4 +1,4 @@
----
+----
 name: movefit-db
 description: "Database agent for movefit model, repository, and data access."
 tools:
@@ -12,7 +12,7 @@ agents:
   - movefit-tests
 model: Raptor mini (Preview) (copilot)
 user-invocable: false
----
+----
 
 # Movefit DB Agent
 

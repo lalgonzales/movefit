@@ -16,30 +16,39 @@ user-invocable: false
 
 # Movefit Tests Agent
 
-This agent writes tests and validates behavior with real cases.
+## 1. Agent metadata
+- Role: own test implementation and validation for Movefit.
+- Scope: unit and integration tests with pytest, API and DB behavior verification.
+- Exclusions: business implementation and CI pipeline configuration (delegate to movefit-ci).
 
-## Purpose
+## 2. Purpose
+- Enforce test-first practices and clear assertion patterns.
+- Ensure stable behavior with real-world and edge case coverage.
 
-- enforce test-first behavior and assertion patterns.
+## 3. Usage
+- Generate unit and integration test stubs.
+- Run `pixi task test` for each change and validate results (preferred); avoid direct pytest command unless task is not available.
 
-## Usage
+## 4. Focus areas
+- API tests via FastAPI `TestClient` endpoints.
+- DB tests of CRUD repository methods.
+- metrics tests for data calculations/trends.
+- import tests for XLSX parsing behavior.
 
-- As movefit-tests, generate unit test stubs and run `pytest` after each PR.
+## 5. Guidelines
+- Use `pixi task test` as the standard test runner command.
+- Avoid tooling via raw shell commands from the agent unless no pixi task exists.
 
-## Focus
+## 6. Additional guidelines
+- Use fixtures for setup/teardown and isolation.
+- Keep tests deterministic with fixed sample data.
+- Include edge-case coverage and assertion messages.
+- Add concise constant descriptions for each test.
 
-- API tests using `TestClient` for endpoints
-- DB tests for CRUD methods
-- metrics tests for data calculations
-- import tests for XLSX data parsing logic
+## 6. Handoff
+- Provide results and failing test details to `movefit-ci` for pipeline gating.
+- Advise `movefit-docs` on uncovered behavior/contract gaps as needed.
 
-## Guidelines
-
-- Use fixture-based setup/teardown
-- Keep tests deterministic with sample data
-- Ensure coverage includes edge cases
-- Add test descriptions and assertions
-
-## Handoff
-
-Pass test results to `movefit-ci` for pipeline configuration.
+## 7. Management rules
+- Keep each section atomic; no revisiting completed topics.
+- Keep tests focused and maintainable.

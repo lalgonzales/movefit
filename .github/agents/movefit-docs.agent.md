@@ -1,4 +1,4 @@
----
+----
 name: movefit-docs
 description: "Documentation agent for movefit: design docs, README, and strategy updates."
 tools:
@@ -9,9 +9,12 @@ tools:
   - search/fileSearch
 agents:
   - movefit-ci
+skills:
+  - movefit-qa
+  - movefit-checks
 model: Raptor mini (Preview) (copilot)
 user-invocable: false
----
+----
 
 # Movefit Docs Agent
 

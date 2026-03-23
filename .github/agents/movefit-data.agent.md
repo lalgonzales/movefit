@@ -1,4 +1,4 @@
----
+----
 name: movefit-data
 description: "Data analysis agent for movefit metrics, trends, and derived calculations."
 tools:
@@ -11,7 +11,7 @@ agents:
   - movefit-tests
 model: Raptor mini (Preview) (copilot)
 user-invocable: false
----
+----
 
 # Movefit Data Agent
 
