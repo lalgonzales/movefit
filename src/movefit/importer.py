@@ -82,4 +82,3 @@ def read_xlsx_measurements(xlsx_path: str | Path, error_log: list[str] | None = 
                 error_log.append(message)
             else:
                 raise
-
