@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 from datetime import datetime
-from typing import Generator, List, Tuple
+from typing import List, Tuple
 
 
 def weight_lb_to_kg(weight_lb: float) -> float:

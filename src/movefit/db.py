@@ -1,4 +1,3 @@
-from contextlib import contextmanager
 from typing import Generator
 
 from sqlmodel import SQLModel, Session, create_engine

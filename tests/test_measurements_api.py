@@ -4,7 +4,7 @@ from sqlalchemy import text
 from sqlalchemy.pool import StaticPool
 from sqlmodel import Session, SQLModel, create_engine
 
-from movefit import app, db, models
+from movefit import app, db
 
 
 @pytest.fixture(scope="module")
@@ -453,7 +453,6 @@ def test_measurements_pagination(client: TestClient):
 
 def test_bulk_import_xlsx(client: TestClient, tmp_path):
     import pandas as pd
-    from pathlib import Path
 
     data = [
         {
