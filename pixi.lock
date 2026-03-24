@@ -822,7 +822,7 @@ packages:
 - pypi: ./
   name: movefit
   version: 0.1.0
-  sha256: 390df0be07017ed80ccc61d9dae643c67b1eebc1348edd442c8f4bf9d4f012cb
+  sha256: 71459054b3f3515dea83aa0fa5a3f46206b0a86be20af32812ddeb5d8d0832ff
   requires_python: '>=3.11'
 - conda: https://conda.anaconda.org/conda-forge/noarch/mypy_extensions-1.1.0-pyha770c72_0.conda
   sha256: 6ed158e4e5dd8f6a10ad9e525631e35cee8557718f83de7a4e3966b1f772c4b1
