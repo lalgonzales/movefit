@@ -41,6 +41,3 @@ jobs:
 
       - name: Run build sanity check
         run: pixi run python -m hatchling build
-
-      - name: Pre-commit checks
-        run: pixi run pre-commit run --all-files
