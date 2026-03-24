@@ -31,20 +31,23 @@ jobs:
           python -m pip install -e .
           python -m pip install pytest hatchling
 
+      - name: Pixi workspace migration (one-time)
+        run: pixi migrate
+
       - name: DB bootstrap
-        run: pixi run python -c "from movefit import db; db.create_db_and_tables()"
+        run: python -c "from movefit import db; db.create_db_and_tables()"
 
       - name: Migrate database
-        run: pixi run migrate
+        run: python -m movefit.db
 
       - name: Run tests
-        run: pixi run pytest -q
+        run: pytest -q
 
       - name: Run hatchling metadata
-        run: pixi run python -m hatchling metadata
+        run: python -m hatchling metadata
 
       - name: Run build sanity check
-        run: pixi run python -m hatchling build
+        run: python -m hatchling build
 
       - name: Pre-commit checks
-        run: pixi run pre-commit run --all-files
+        run: pre-commit run --all-files
