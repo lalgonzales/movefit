@@ -24,7 +24,6 @@ migrate = "python -m movefit.db"
 
 
 [tool.pixi.dependencies]
-
 pandas = ">=3.0.1,<4"
 openpyxl = ">=3.1.5,<4"
 fastapi = ">=0.135.1,<0.136"
@@ -34,4 +33,3 @@ pytest = ">=9.0.2,<10"
 hatchling = ">=1.29.0,<2"
 ruff = ">=0.15.7,<0.16"
 black = ">=26.1.0,<27"
-pre-commit = ">=4.0.0,<5"
