@@ -26,28 +26,21 @@ jobs:
       - name: Install pixi
         run: python -m pip install --upgrade pip && pip install pixi
 
-      - name: Install package dependencies directly
+      - name: Install pixi environment dependencies
         run: |
-          python -m pip install -e .
-          python -m pip install pytest hatchling
-
-      - name: Pixi workspace migration (one-time)
-        run: pixi migrate
-
-      - name: DB bootstrap
-        run: python -c "from movefit import db; db.create_db_and_tables()"
+          pixi install --locked
 
       - name: Migrate database
-        run: python -m movefit.db
+        run: pixi run migrate
 
       - name: Run tests
-        run: pytest -q
+        run: pixi run test
 
       - name: Run hatchling metadata
-        run: python -m hatchling metadata
+        run: pixi run python -m hatchling metadata
 
       - name: Run build sanity check
-        run: python -m hatchling build
+        run: pixi run python -m hatchling build
 
       - name: Pre-commit checks
-        run: pre-commit run --all-files
+        run: pixi run pre-commit run --all-files
