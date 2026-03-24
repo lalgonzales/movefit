@@ -34,6 +34,9 @@ jobs:
       - name: DB bootstrap
         run: pixi run python -c "from movefit import db; db.create_db_and_tables()"
 
+      - name: Migrate database
+        run: pixi run migrate
+
       - name: Run tests
         run: pixi run pytest -q
 
