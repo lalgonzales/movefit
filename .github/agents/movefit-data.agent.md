@@ -13,6 +13,10 @@ tools:
   - execute/awaitTerminal
   - execute/getTerminalOutput
   - execute/killTerminal
+  - web/fetch
+  - web/githubRepo
+  - vscode/askQuestions
+  - vscode/vscodeAPI
 agents:
   - movefit-tests
   - movefit-fastapi

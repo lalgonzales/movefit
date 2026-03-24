@@ -13,6 +13,10 @@ tools:
   - read/readFile
   - search/codebase
   - search/fileSearch
+  - web/fetch
+  - web/githubRepo
+  - vscode/askQuestions
+  - vscode/vscodeAPI
 agents:
   - movefit-tests
   - movefit-git

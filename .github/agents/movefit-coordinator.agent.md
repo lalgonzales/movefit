@@ -18,6 +18,10 @@ tools:
   - execute/getTerminalOutput
   - execute/killTerminal
   - execute/runInTerminal
+  - web/fetch
+  - web/githubRepo
+  - vscode/askQuestions
+  - vscode/vscodeAPI
 agents:
   - movefit-fastapi
   - movefit-data
