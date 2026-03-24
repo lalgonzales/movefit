@@ -48,6 +48,9 @@ class MeasurementTrends(SQLModel):
     points: List[TrendPoint]
     slope: float
     category: str
+    delta: Optional[float] = None
+    pct_change: Optional[float] = None
+    trend_dir: Optional[str] = None
 
 
 class BulkImportResult(SQLModel):

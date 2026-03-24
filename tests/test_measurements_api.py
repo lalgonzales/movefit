@@ -103,6 +103,10 @@ def test_latest_summary_trends(client: TestClient):
     assert isinstance(trends_data['points'], list)
     assert 'slope' in trends_data
     assert 'category' in trends_data
+    assert 'delta' in trends_data
+    assert 'pct_change' in trends_data
+    assert 'trend_dir' in trends_data
+    assert trends_data['trend_dir'] in {'increasing', 'decreasing', 'stable', None}
 
 
     trends_bmi = client.get('/trends?metric=bmi')
