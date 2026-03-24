@@ -8,7 +8,18 @@ tools:
   - read/readFile
   - search/codebase
   - search/fileSearch
-agents: []
+  - execute/runTask
+  - execute/createAndRunTask
+  - execute/awaitTerminal
+  - execute/getTerminalOutput
+  - execute/killTerminal
+agents:
+  - movefit-coordinator
+  - movefit-ci
+  - movefit-docs
+  - movefit-tests
+github:
+  - gh
 model: Raptor mini (Preview) (copilot)
 user-invocable: false
 ----

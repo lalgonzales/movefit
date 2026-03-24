@@ -1,4 +1,5 @@
 # Movefit
+[![CI](https://github.com/${{ github.repository }}/actions/workflows/ci.yml/badge.svg)](https://github.com/${{ github.repository }}/actions/workflows/ci.yml)
 
 Current project status: fully functional backend with measurement endpoints, analysis APIs, and bulk import (including JSON and XLSX support).
 
@@ -16,7 +17,7 @@ Current project status: fully functional backend with measurement endpoints, ana
 - Dependencies and environment managed via `pixi`
 
 ## Next steps
-1. Add CI workflow in `.github/workflows/python-app.yml`.
+1. Add CI workflow in `.github/workflows/ci.yml`.
 2. Implement a lightweight frontend for consumption.
 3. Publish, document, and version the application.
 

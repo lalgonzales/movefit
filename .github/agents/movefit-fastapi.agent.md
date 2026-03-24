@@ -9,6 +9,11 @@ tools:
   - read/readFile
   - search/codebase
   - search/fileSearch
+  - execute/runTask
+  - execute/createAndRunTask
+  - execute/awaitTerminal
+  - execute/getTerminalOutput
+  - execute/killTerminal
 agents:
   - movefit-data
   - movefit-db

@@ -1,7 +1,6 @@
 ---
 name: repo-maintenance
-version: 1.0
-summary: "Repository synchronization and stale branch cleanup workflow for AI-assisted development."
+description: "Repository synchronization and stale branch cleanup workflow for AI-assisted development."
 ---
 
 # repo-maintenance Skill

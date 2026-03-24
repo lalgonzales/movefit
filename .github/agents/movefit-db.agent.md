@@ -4,12 +4,18 @@ description: "Database agent for movefit model, repository, and data access."
 tools:
   - agent
   - agent/runSubagent
-  - execute/runInTerminal
   - read/readFile
   - search/codebase
   - search/fileSearch
+  - execute/runInTerminal
+  - execute/runTask
+  - execute/createAndRunTask
+  - execute/awaitTerminal
+  - execute/getTerminalOutput
+  - execute/killTerminal
 agents:
   - movefit-tests
+  - movefit-fastapi
 model: Raptor mini (Preview) (copilot)
 user-invocable: false
 ----

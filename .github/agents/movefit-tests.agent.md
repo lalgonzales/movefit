@@ -8,8 +8,18 @@ tools:
   - execute/runInTerminal
   - read/readFile
   - search/codebase
+  - search/fileSearch
+  - execute/runTask
+  - execute/createAndRunTask
+  - execute/awaitTerminal
+  - execute/getTerminalOutput
+  - execute/killTerminal
 agents:
   - movefit-ci
+  - movefit-fastapi
+  - movefit-db
+  - movefit-docs
+  - movefit-frontend
 model: Raptor mini (Preview) (copilot)
 user-invocable: false
 ---
