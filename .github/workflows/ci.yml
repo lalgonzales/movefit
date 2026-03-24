@@ -28,14 +28,14 @@ jobs:
           python -m pip install --upgrade pip setuptools wheel
           python -m pip install pixi
 
+      - name: Install pixi workspace packages
+        run: pixi install --locked
+
       - name: Delete working SQLite DB (if present)
         run: rm -f movefit.db
 
       - name: Run migrate
         run: pixi run migrate
-
-      - name: Install pixi workspace packages
-        run: pixi install --locked
 
       - name: Run tests
         run: pixi run test
