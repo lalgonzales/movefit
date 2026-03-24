@@ -23,17 +23,19 @@ jobs:
         with:
           python-version: "3.11"
 
-      - name: Install dependencies for pipx/pixi
+      - name: Install dependencies for pixi
         run: |
           python -m pip install --upgrade pip setuptools wheel
           python -m pip install pixi
 
-      - name: Install pixi workspace packages
-        run: |
-          pixi install --locked
+      - name: Delete working SQLite DB (if present)
+        run: rm -f movefit.db
 
-      - name: Migrate database
+      - name: Run migrate
         run: pixi run migrate
+
+      - name: Install pixi workspace packages
+        run: pixi install --locked
 
       - name: Run tests
         run: pixi run test
@@ -44,7 +46,7 @@ jobs:
           pixi run black --check .
 
       - name: Run hatchling metadata
-        run: pixi run python -m hatchling metadata
+        run: pixi run hatchling metadata
 
       - name: Run build sanity check
-        run: pixi run python -m hatchling build
+        run: pixi run hatchling build
