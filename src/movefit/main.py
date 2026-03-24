@@ -298,7 +298,14 @@ def measurement_trends(
     if window is not None:
         by_period: dict[datetime, list[float]] = {}
         for m in results:
-            value = m.weight_kg if metric == "weight" else (m.bmi or 0.0)
+            if metric == "weight":
+                if m.weight_kg is None:
+                    continue
+                value = m.weight_kg
+            else:
+                if m.bmi is None:
+                    continue
+                value = m.bmi
             period = to_period_start(m.timestamp, window)
             by_period.setdefault(period, []).append(value)
 
@@ -310,9 +317,11 @@ def measurement_trends(
         points = [
             models.TrendPoint(
                 timestamp=m.timestamp,
-                value=(m.weight_kg if metric == "weight" else (m.bmi or 0.0)),
+                value=(m.weight_kg if metric == "weight" else m.bmi),
             )
             for m in results
+            if (metric == "weight" and m.weight_kg is not None)
+            or (metric == "bmi" and m.bmi is not None)
         ]
 
     slope = 0.0
@@ -325,11 +334,11 @@ def measurement_trends(
     elif slope < -0.01:
         category = "decreasing"
 
-    delta = None
-    pct_change = None
-    trend_dir = None
-
-    if len(points) > 1:
+    if len(points) == 0:
+        delta = None
+        pct_change = None
+        trend_dir = None
+    else:
         first = points[0].value
         last = points[-1].value
         delta = last - first
@@ -344,7 +353,6 @@ def measurement_trends(
             trend_dir = "decreasing"
         else:
             trend_dir = "stable"
-
     return models.MeasurementTrends(
         metric=metric,
         points=points,
