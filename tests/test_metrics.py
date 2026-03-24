@@ -15,11 +15,15 @@ def test_calculate_bmi_none_height():
 
 
 def test_calculate_bmi_height_m():
-    assert pytest.approx(metrics.calculate_bmi(70.0, height_m=1.75), rel=1e-6) == pytest.approx(22.857142, rel=1e-6)
+    assert pytest.approx(
+        metrics.calculate_bmi(70.0, height_m=1.75), rel=1e-6
+    ) == pytest.approx(22.857142, rel=1e-6)
 
 
 def test_calculate_bmi_height_cm():
-    assert pytest.approx(metrics.calculate_bmi(70.0, height_cm=175), rel=1e-6) == pytest.approx(22.857142, rel=1e-6)
+    assert pytest.approx(
+        metrics.calculate_bmi(70.0, height_cm=175), rel=1e-6
+    ) == pytest.approx(22.857142, rel=1e-6)
 
 
 def test_calculate_slopeline_linear():

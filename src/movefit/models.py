@@ -7,7 +7,9 @@ from sqlmodel import Field, SQLModel
 
 
 class MeasurementBase(SQLModel):
-    timestamp: datetime = Field(default_factory=lambda: datetime.now(timezone.utc), nullable=False)
+    timestamp: datetime = Field(
+        default_factory=lambda: datetime.now(timezone.utc), nullable=False
+    )
     device_mac: str
     device_name: Optional[str] = None
     weight_lb: float
