@@ -29,10 +29,13 @@ jobs:
       - name: Install package dependencies directly
         run: |
           python -m pip install -e .
-          python -m pip install pytest hatchling ruff black
+          python -m pip install pytest hatchling ruff black "click<9"
+
+      - name: DB bootstrap
+        run: pixi run python -c "from movefit import db; db.create_db_and_tables()"
 
       - name: Run tests
-        run: pixi run test
+        run: pixi run pytest -q
 
       - name: Run hatchling metadata
         run: pixi run python -m hatchling metadata
@@ -42,5 +45,5 @@ jobs:
 
       - name: Format check
         run: |
-          ruff check src tests
-          black --check src tests
+          pixi run ruff check src tests
+          pixi run black --check src tests
