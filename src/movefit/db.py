@@ -22,8 +22,6 @@ def create_db_and_tables(engine=None):
     SQLModel.metadata.create_all(engine)
 
 
-
-
 def migrate(engine=None):
     """Apply schema migrations (idempotent via SQLModel metadata create_all)."""
     create_db_and_tables(engine)
