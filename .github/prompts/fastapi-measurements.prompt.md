@@ -2,7 +2,7 @@
 description: "Prompt for generating FastAPI endpoints for movefit measurement ingestion and querying."
 tools:
   - search
-  - terminal
+  - execute/runInTerminal
 ---
 
 Given the Movefit design document, create FastAPI route handlers for the following endpoints:

@@ -1,3 +1,9 @@
+---
+description: "Prompt template for the movefit-db agent; defines DB models and migration strategy."
+tools:
+  - search
+---
+
 # movefit-db prompt template
 
 Use this prompt when defining database schema, ORM models, and migration behavior for Movefit.

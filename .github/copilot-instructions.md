@@ -1,6 +1,5 @@
 ---
 name: movefit
-version: 1.0
 description: "Workspace instructions for the movefit Python package. Use for code changes, tests, packaging, and minimal architecture context."
 ---
 
@@ -70,6 +69,13 @@ description: "Workspace instructions for the movefit Python package. Use for cod
 
 - If different scopes emerge (CLI, API, ingestion), add specific `*.instructions.md` files under `.github/instructions/` with `applyTo` patterns.
 - Add a `.github/hooks/pre-commit` hook to run formatting and static checks.
+
+## Prompt template style
+
+- Prompt templates live under `.github/prompts/*.prompt.md`.
+- All templates should include YAML frontmatter with `description` and optional `tools`.
+- Keep instructions clear, with expected input and output sections, and safe defaults for destructive operations (e.g., branch deletion).
+- Links to meeting slot patterns or example prompts should be added in `AGENTS.md` and `movefit-coordinator.prompt.md`.
 
 ## Commit message style for agents and humans
 

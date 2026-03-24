@@ -1,3 +1,9 @@
+---
+description: "Prompt template for the movefit-data agent; defines metric calculations and analytics logic."
+tools:
+  - search
+---
+
 # movefit-data prompt template
 
 Use this prompt when defining metric calculation features and analytic behavior.
