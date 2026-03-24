@@ -11,17 +11,20 @@ tools:
   - execute/getTerminalOutput
   - execute/killTerminal
   - read/readFile
+  - search/codebase
+  - search/fileSearch
 agents:
   - movefit-tests
   - movefit-git
-skills:
-  - movefit-qa
-  - movefit-checks
 model: Raptor mini (Preview) (copilot)
 user-invocable: false
 ---
 
 # Movefit CI Agent
+skills:
+  - movefit-qa
+  - movefit-checks
+
 
 ## 1. Agent metadata
 - Role: establish and maintain continuous integration workflows for Movefit.

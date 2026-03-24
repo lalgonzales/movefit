@@ -1,7 +1,5 @@
-from __future__ import annotations
-
 from contextlib import asynccontextmanager
-from datetime import datetime, timezone
+from datetime import date, datetime, timezone
 from pathlib import Path
 from tempfile import NamedTemporaryFile
 from typing import Any
@@ -27,13 +25,19 @@ app = FastAPI(
     lifespan=lifespan,
 )
 
-app.add_middleware(CORSMiddleware, allow_origins=['*'], allow_credentials=True, allow_methods=['*'], allow_headers=['*'])
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
 
 
-
-@app.get('/healthz', summary='Health check', tags=['health'])
+@app.get("/healthz", summary="Health check", tags=["health"])
 def healthz():
-    return {'status': 'ok'}
+    return {"status": "ok"}
+
 
 @app.post(
     "/measurements",
@@ -78,7 +82,11 @@ def read_measurements(
     if to_ts:
         statement = statement.where(models.Measurement.timestamp <= to_ts)
 
-    statement = statement.order_by(models.Measurement.timestamp.asc() if sort == "asc" else models.Measurement.timestamp.desc())
+    statement = statement.order_by(
+        models.Measurement.timestamp.asc()
+        if sort == "asc"
+        else models.Measurement.timestamp.desc()
+    )
     statement = statement.offset(offset).limit(limit)
 
     return session.exec(statement).all()
@@ -103,7 +111,9 @@ def bulk_import_measurements(
     for idx, row in enumerate(payload):
         try:
             measurement = models.MeasurementCreate.model_validate(row)
-            if (measurement.weight_kg is None or measurement.weight_kg == 0) and measurement.weight_lb:
+            if (
+                measurement.weight_kg is None or measurement.weight_kg == 0
+            ) and measurement.weight_lb:
                 measurement.weight_kg = metrics.weight_lb_to_kg(measurement.weight_lb)
 
             db_model = models.Measurement.model_validate(measurement)
@@ -140,10 +150,16 @@ def bulk_import_measurements_xlsx(
         tmp_path = Path(tmp.name)
 
     try:
-        for idx, measurement in enumerate(importer.read_xlsx_measurements(tmp_path, error_log=errors)):
+        for idx, measurement in enumerate(
+            importer.read_xlsx_measurements(tmp_path, error_log=errors)
+        ):
             try:
-                if (measurement.weight_kg is None or measurement.weight_kg == 0) and measurement.weight_lb:
-                    measurement.weight_kg = metrics.weight_lb_to_kg(measurement.weight_lb)
+                if (
+                    measurement.weight_kg is None or measurement.weight_kg == 0
+                ) and measurement.weight_lb:
+                    measurement.weight_kg = metrics.weight_lb_to_kg(
+                        measurement.weight_lb
+                    )
 
                 db_model = models.Measurement.model_validate(measurement)
                 session.add(db_model)
@@ -165,6 +181,7 @@ def bulk_import_measurements_xlsx(
 
 # ... rest of endpoints remain unchanged ...
 
+
 @app.get(
     "/measurements/latest",
     response_model=models.MeasurementRead,
@@ -173,7 +190,11 @@ def bulk_import_measurements_xlsx(
     tags=["measurements"],
 )
 def read_latest_measurement(session: Session = Depends(db.get_session)):
-    statement = select(models.Measurement).order_by(models.Measurement.timestamp.desc()).limit(1)
+    statement = (
+        select(models.Measurement)
+        .order_by(models.Measurement.timestamp.desc())
+        .limit(1)
+    )
     measurement = session.exec(statement).first()
     if not measurement:
         raise HTTPException(status_code=404, detail="No measurements found")
@@ -201,7 +222,11 @@ def read_measurement(measurement_id: int, session: Session = Depends(db.get_sess
     description="Return aggregate stats across measurements.",
     tags=["analytics"],
 )
-def measurement_summary(session: Session = Depends(db.get_session)):
+def measurement_summary(
+    from_ts: datetime | None = Query(None, alias="from"),
+    to_ts: datetime | None = Query(None, alias="to"),
+    session: Session = Depends(db.get_session),
+):
     statement = select(
         func.count(models.Measurement.id),
         func.avg(models.Measurement.weight_kg),
@@ -210,9 +235,20 @@ def measurement_summary(session: Session = Depends(db.get_session)):
         func.avg(models.Measurement.bmi),
         func.avg(models.Measurement.body_fat_pct),
     )
+    if from_ts:
+        statement = statement.where(models.Measurement.timestamp >= from_ts)
+    if to_ts:
+        statement = statement.where(models.Measurement.timestamp <= to_ts)
     row = session.exec(statement).one()
     if row[0] == 0:
-        return models.MeasurementSummary(total=0, average_weight_kg=0.0, min_weight_kg=0.0, max_weight_kg=0.0, average_bmi=None, average_body_fat_pct=None)
+        return models.MeasurementSummary(
+            total=0,
+            average_weight_kg=0.0,
+            min_weight_kg=0.0,
+            max_weight_kg=0.0,
+            average_bmi=None,
+            average_body_fat_pct=None,
+        )
 
     return models.MeasurementSummary(
         total=row[0],
@@ -233,15 +269,60 @@ def measurement_summary(session: Session = Depends(db.get_session)):
 )
 def measurement_trends(
     metric: str = Query("weight", pattern="^(weight|bmi)$"),
+    window: str | None = Query(None, pattern="^(daily|weekly|monthly)$"),
+    from_ts: datetime | None = Query(None, alias="from"),
+    to_ts: datetime | None = Query(None, alias="to"),
     session: Session = Depends(db.get_session),
 ):
-    statement = select(models.Measurement).order_by(models.Measurement.timestamp)
+    statement = select(models.Measurement)
+    if from_ts:
+        statement = statement.where(models.Measurement.timestamp >= from_ts)
+    if to_ts:
+        statement = statement.where(models.Measurement.timestamp <= to_ts)
+    statement = statement.order_by(models.Measurement.timestamp)
     results = session.exec(statement).all()
 
-    points = []
-    for m in results:
-        value = m.weight_kg if metric == "weight" else (m.bmi or 0.0)
-        points.append(models.TrendPoint(timestamp=m.timestamp, value=value))
+    def to_period_start(ts: datetime, window_name: str) -> datetime:
+        if window_name == "daily":
+            return datetime(ts.year, ts.month, ts.day, tzinfo=ts.tzinfo)
+        if window_name == "weekly":
+            isoyear, week, _ = ts.isocalendar()
+            week_start = date.fromisocalendar(isoyear, week, 1)
+            return datetime(
+                week_start.year, week_start.month, week_start.day, tzinfo=ts.tzinfo
+            )
+        if window_name == "monthly":
+            return datetime(ts.year, ts.month, 1, tzinfo=ts.tzinfo)
+        return ts
+
+    if window is not None:
+        by_period: dict[datetime, list[float]] = {}
+        for m in results:
+            if metric == "weight":
+                if m.weight_kg is None:
+                    continue
+                value = m.weight_kg
+            else:
+                if m.bmi is None:
+                    continue
+                value = m.bmi
+            period = to_period_start(m.timestamp, window)
+            by_period.setdefault(period, []).append(value)
+
+        points = [
+            models.TrendPoint(timestamp=period, value=sum(vals) / len(vals))
+            for period, vals in sorted(by_period.items())
+        ]
+    else:
+        points = [
+            models.TrendPoint(
+                timestamp=m.timestamp,
+                value=(m.weight_kg if metric == "weight" else m.bmi),
+            )
+            for m in results
+            if (metric == "weight" and m.weight_kg is not None)
+            or (metric == "bmi" and m.bmi is not None)
+        ]
 
     slope = 0.0
     if len(points) > 1:
@@ -253,7 +334,34 @@ def measurement_trends(
     elif slope < -0.01:
         category = "decreasing"
 
-    return models.MeasurementTrends(metric=metric, points=points, slope=slope, category=category)
+    if len(points) == 0:
+        delta = None
+        pct_change = None
+        trend_dir = None
+    else:
+        first = points[0].value
+        last = points[-1].value
+        delta = last - first
+        if first != 0:
+            pct_change = (delta / first) * 100.0
+        else:
+            pct_change = None
+
+        if delta > 0:
+            trend_dir = "increasing"
+        elif delta < 0:
+            trend_dir = "decreasing"
+        else:
+            trend_dir = "stable"
+    return models.MeasurementTrends(
+        metric=metric,
+        points=points,
+        slope=slope,
+        category=category,
+        delta=delta,
+        pct_change=pct_change,
+        trend_dir=trend_dir,
+    )
 
 
 @app.get(
@@ -264,18 +372,38 @@ def measurement_trends(
     tags=["analytics"],
 )
 def get_alerts(session: Session = Depends(db.get_session)):
-    measurements = session.exec(select(models.Measurement).order_by(models.Measurement.timestamp)).all()
+    measurements = session.exec(
+        select(models.Measurement).order_by(models.Measurement.timestamp)
+    ).all()
     alerts = []
 
     for idx, m in enumerate(measurements):
         if m.body_fat_pct is not None and m.body_fat_pct > 30:
-            alerts.append(models.AlertItem(measurement_id=m.id, metric='body_fat_pct', value=m.body_fat_pct, message='Body fat > 30%'))
+            alerts.append(
+                models.AlertItem(
+                    measurement_id=m.id,
+                    metric="body_fat_pct",
+                    value=m.body_fat_pct,
+                    message="Body fat > 30%",
+                )
+            )
         if m.bmi is not None and m.bmi > 30:
-            alerts.append(models.AlertItem(measurement_id=m.id, metric='bmi', value=m.bmi, message='BMI > 30'))
+            alerts.append(
+                models.AlertItem(
+                    measurement_id=m.id, metric="bmi", value=m.bmi, message="BMI > 30"
+                )
+            )
         if idx > 0:
-            prev = measurements[idx-1]
+            prev = measurements[idx - 1]
             if m.weight_kg - prev.weight_kg > 2:
-                alerts.append(models.AlertItem(measurement_id=m.id, metric='weight_kg', value=m.weight_kg, message='Weight jump > 2kg'))
+                alerts.append(
+                    models.AlertItem(
+                        measurement_id=m.id,
+                        metric="weight_kg",
+                        value=m.weight_kg,
+                        message="Weight jump > 2kg",
+                    )
+                )
 
     return models.AlertList(alerts=alerts)
 

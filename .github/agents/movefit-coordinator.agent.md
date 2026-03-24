@@ -3,9 +3,6 @@ name: movefit-coordinator
 description: "Coordinator agent for movefit: manage roles and dispatch work to specialized agents (FastAPI, data, db, tests, ci, docs)."
 tools:
   - agent
-  - execute/runInTerminal
-  - execute/runTask
-  - execute/createAndRunTask
   - read/readFile
   - agent/runSubagent
   - search/changes
@@ -15,6 +12,12 @@ tools:
   - search/searchResults
   - search/textSearch
   - search/usages
+  - execute/runTask
+  - execute/createAndRunTask
+  - execute/awaitTerminal
+  - execute/getTerminalOutput
+  - execute/killTerminal
+  - execute/runInTerminal
 agents:
   - movefit-fastapi
   - movefit-data

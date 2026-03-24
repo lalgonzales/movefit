@@ -103,6 +103,12 @@ def test_latest_summary_trends(client: TestClient):
     assert isinstance(trends_data['points'], list)
     assert 'slope' in trends_data
     assert 'category' in trends_data
+    assert 'delta' in trends_data
+    assert 'pct_change' in trends_data
+    assert 'trend_dir' in trends_data
+    assert trends_data['trend_dir'] == 'increasing'
+    assert trends_data['delta'] > 0
+    assert trends_data['pct_change'] > 0
 
 
     trends_bmi = client.get('/trends?metric=bmi')
@@ -112,6 +118,98 @@ def test_latest_summary_trends(client: TestClient):
     assert 'category' in trends_bmi.json()
 
 
+
+
+def test_trends_empty_dataset(client: TestClient):
+    # Ensure /trends works with no measurements and returns stable/None semantics
+    with Session(client.app.state._test_engine) as session:
+        session.execute(text('DELETE FROM measurement'))
+        session.commit()
+
+    response = client.get('/trends?metric=weight')
+    assert response.status_code == 200
+    data = response.json()
+    assert data['points'] == []
+    assert data['slope'] == 0.0
+    assert data['category'] == 'stable'
+    assert data['delta'] is None
+    assert data['pct_change'] is None
+    assert data['trend_dir'] is None
+
+
+def test_trends_bmi_handles_missing_values(client: TestClient):
+    # Clear and add partial bmi data
+    with Session(client.app.state._test_engine) as session:
+        session.execute(text('DELETE FROM measurement'))
+        session.commit()
+
+    client.post('/measurements', json={'device_mac': 'AA:AA:AA:AA:AA:AA', 'device_name': 'Scale A', 'weight_lb': 150.0, 'weight_kg': 68.0, 'body_fat_pct': 16.0, 'bmi': None})
+    client.post('/measurements', json={'device_mac': 'BB:BB:BB:BB:BB:BB', 'device_name': 'Scale B', 'weight_lb': 160.0, 'weight_kg': 72.6, 'body_fat_pct': 18.0, 'bmi': 24.0})
+
+    response = client.get('/trends?metric=bmi')
+    assert response.status_code == 200
+    data = response.json()
+    assert data['metric'] == 'bmi'
+    assert len(data['points']) == 1
+    assert data['points'][0]['value'] == 24.0
+
+
+
+def test_summary_with_time_range(client: TestClient):
+    # Reset DB
+    with Session(client.app.state._test_engine) as session:
+        session.execute(text('DELETE FROM measurement'))
+        session.commit()
+
+    samples = [
+        {'timestamp': '2026-03-01T08:00:00Z', 'device_mac': 'AA:AA:AA:AA:AA:AA', 'device_name': 'Scale A', 'weight_lb': 150.0, 'weight_kg': 68.0, 'body_fat_pct': 18.0, 'bmi': 21.0},
+        {'timestamp': '2026-03-02T08:00:00Z', 'device_mac': 'BB:BB:BB:BB:BB:BB', 'device_name': 'Scale B', 'weight_lb': 160.0, 'weight_kg': 72.6, 'body_fat_pct': 19.0, 'bmi': 22.0},
+        {'timestamp': '2026-03-03T08:00:00Z', 'device_mac': 'CC:CC:CC:CC:CC:CC', 'device_name': 'Scale C', 'weight_lb': 170.0, 'weight_kg': 77.1, 'body_fat_pct': 20.0, 'bmi': 23.0},
+    ]
+    for payload in samples:
+        r = client.post('/measurements', json=payload)
+        assert r.status_code == 200
+
+    response = client.get('/summary?from=2026-03-02T00:00:00Z&to=2026-03-03T23:59:59Z')
+    assert response.status_code == 200
+    body = response.json()
+    assert body['total'] == 2
+    assert body['min_weight_kg'] == pytest.approx(72.6)
+    assert body['max_weight_kg'] == pytest.approx(77.1)
+
+
+@pytest.mark.parametrize('metric,window', [
+    ('weight', 'daily'),
+    ('weight', 'weekly'),
+    ('weight', 'monthly'),
+    ('bmi', 'daily'),
+    ('bmi', 'weekly'),
+    ('bmi', 'monthly'),
+])
+def test_trends_with_window_preserves_trend_dir(client: TestClient, metric: str, window: str):
+    # Reset DB
+    with Session(client.app.state._test_engine) as session:
+        session.execute(text('DELETE FROM measurement'))
+        session.commit()
+
+    samples = [
+        {'timestamp': '2026-03-01T08:00:00Z', 'device_mac': 'A1', 'device_name': 'Scale A', 'weight_lb': 154.3, 'weight_kg': 70.0, 'body_fat_pct': 18.0, 'bmi': 21.0},
+        {'timestamp': '2026-03-02T08:00:00Z', 'device_mac': 'B1', 'device_name': 'Scale B', 'weight_lb': 158.7, 'weight_kg': 72.0, 'body_fat_pct': 18.5, 'bmi': 22.0},
+        {'timestamp': '2026-03-08T08:00:00Z', 'device_mac': 'C1', 'device_name': 'Scale C', 'weight_lb': 162.0, 'weight_kg': 74.0, 'body_fat_pct': 19.0, 'bmi': 23.0},
+        {'timestamp': '2026-04-01T08:00:00Z', 'device_mac': 'D1', 'device_name': 'Scale D', 'weight_lb': 166.0, 'weight_kg': 76.0, 'body_fat_pct': 19.5, 'bmi': 24.0},
+    ]
+    for payload in samples:
+        r = client.post('/measurements', json=payload)
+        assert r.status_code == 200
+
+    response = client.get(f'/trends?metric={metric}&window={window}&from=2026-03-01T00:00:00Z&to=2026-04-30T23:59:59Z')
+    assert response.status_code == 200
+    data = response.json()
+    assert data['metric'] == metric
+    assert data['trend_dir'] == 'increasing'
+    assert data['delta'] is not None and data['delta'] > 0
+    assert data['pct_change'] is not None and data['pct_change'] > 0
+    assert len(data['points']) >= 2
 def test_summary_no_data(client: TestClient):
     # Reset DB by creating a new session or assuming test ordering allows empty DB scenario
     # Here we use a separate endpoint with clean session by re-initializing if needed.

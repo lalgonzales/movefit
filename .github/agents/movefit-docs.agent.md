@@ -7,6 +7,13 @@ tools:
   - read/readFile
   - search/codebase
   - search/fileSearch
+  - execute/runInTerminal
+  - execute/runTests
+  - execute/runTask
+  - execute/createAndRunTask
+  - execute/awaitTerminal
+  - execute/getTerminalOutput
+  - execute/killTerminal
 agents:
   - movefit-ci
 skills:
